@@ -8,6 +8,7 @@ type TCarouselProps = {
   stopOnHover?: boolean;
   showArrows?: boolean;
   swipeable?: boolean;
+  iconRatio?: number;
   children?: React.ReactNode | React.ReactNode[];
   onClickItem?: (e: React.MouseEvent | MouseEvent) => void;
 };

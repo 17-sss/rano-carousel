@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { TCarouselProps } from "./types";
 import * as style from "./style";
+import ArrowButton from "./ArrowButton";
 
 const Carousel = ({
   infiniteLoop = false,
@@ -12,6 +13,7 @@ const Carousel = ({
   stopOnHover = false,
   showArrows = true,
   swipeable = true,
+  iconRatio = 10,
   children,
 
   onClickItem,
@@ -43,6 +45,8 @@ const Carousel = ({
   return data && data.length > 0 ? (
     <CarouselLayout>
       {cards}
+      <ArrowButton direction="left" {...{ iconRatio }} />
+      <ArrowButton direction="right" {...{ iconRatio }} />
     </CarouselLayout>
   ) : (
     <></>
