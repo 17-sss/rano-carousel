@@ -4,8 +4,12 @@ import { TArrowButtonProps, TArrowButtonSizeInfo } from "./type";
 
 import { debounce } from "../../../utils/util";
 
-const ArrowButton = ({ direction, iconRatio, children, onClick }: TArrowButtonProps) => {
-  const [sizeInfo, setSizeInfo] = useState<TArrowButtonSizeInfo>({ buttonHeight: 0, parentHeight: 0, iconRatio });
+const ArrowButton = ({ direction, iconRatio, style, children, onClick }: TArrowButtonProps) => {
+  const [sizeInfo, setSizeInfo] = useState<TArrowButtonSizeInfo>({
+    buttonHeight: 0,
+    parentHeight: 0,
+    iconRatio,
+  });
   const [timer, setTimer] = useState(0);
   const arrowButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -43,7 +47,12 @@ const ArrowButton = ({ direction, iconRatio, children, onClick }: TArrowButtonPr
   // --
 
   return (
-    <ArrowButtonLayout onClick={onClick} ref={arrowButtonRef} {...{ sizeInfo, direction }}>
+    <ArrowButtonLayout
+      onClick={onClick}
+      ref={arrowButtonRef}
+      style={style}
+      {...{ sizeInfo, direction }}
+    >
       {children || {}}
     </ArrowButtonLayout>
   );

@@ -22,7 +22,6 @@ const Carousel = ({
   onClickItem,
   ...props
 }: TCarouselProps) => {
-  // const 
   const [data, setData] = useState<React.ReactNode[] | null>(null);
 
   useEffect(() => {
@@ -47,10 +46,14 @@ const Carousel = ({
   }, [data, thumbMode, thumbWidth, oneThumbRatio]);
 
   return data && data.length > 0 ? (
-    <CarouselLayout>
+    <CarouselLayout {...props}>
       {cards}
-      <ArrowButton direction="left" {...{ iconRatio }}>{buttonStyle?.left || <IoIosArrowBack/>}</ArrowButton>
-      <ArrowButton direction="right" {...{ iconRatio }}>{buttonStyle?.right || <IoIosArrowForward/>}</ArrowButton>
+      <ArrowButton direction="left" {...{ iconRatio, style: buttonStyle?.left?.style }}>
+        {buttonStyle?.left?.icon || <IoIosArrowBack />}
+      </ArrowButton>
+      <ArrowButton direction="right" {...{ iconRatio, style: buttonStyle?.right?.style }}>
+        {buttonStyle?.right?.icon || <IoIosArrowForward />}
+      </ArrowButton>
     </CarouselLayout>
   ) : (
     <></>

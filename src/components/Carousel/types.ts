@@ -1,4 +1,10 @@
+import React from "react";
 import { IconType } from "react-icons/lib";
+
+type TCarouselButtonStyle = {
+  icon?: IconType | string;
+  style?: React.CSSProperties;
+};
 
 type TCarouselProps = {
   infiniteLoop?: boolean;
@@ -13,8 +19,8 @@ type TCarouselProps = {
   iconRatio?: number;
   children?: React.ReactNode | React.ReactNode[];
   buttonStyle?: {
-    left: IconType | string;
-    right: IconType | string;
+    left?: TCarouselButtonStyle;
+    right?: TCarouselButtonStyle;
   };
   onClickItem?: (e: React.MouseEvent | MouseEvent) => void;
 };
@@ -23,4 +29,4 @@ type TCarouselItem = Pick<TCarouselProps, "thumbMode" | "oneThumbRatio" | "thumb
   itemLength: number;
 };
 
-export type { TCarouselProps, TCarouselItem };
+export type { TCarouselProps, TCarouselButtonStyle, TCarouselItem };

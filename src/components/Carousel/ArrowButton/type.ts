@@ -1,6 +1,9 @@
+import React from "react";
+
 type TArrowButtonProps = {
   direction: "left" | "right";
   iconRatio: number;
+  style?: React.CSSProperties;
   onClick?: (e: React.MouseEvent | MouseEvent) => void;
   children?: React.ReactNode | React.ReactNode[];
 };
