@@ -4,4 +4,10 @@ type TArrowButtonProps = {
   onClick?: (e: React.MouseEvent | MouseEvent) => void;
 };
 
-export type { TArrowButtonProps };
+type TArrowButtonSizeInfo = {
+  buttonHeight: number;
+  parentHeight: number;
+  iconRatio: number;
+};
+
+export type { TArrowButtonProps, TArrowButtonSizeInfo };
