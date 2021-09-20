@@ -1,28 +1,11 @@
 import styled, { css } from "styled-components";
-import { flexSet } from "./mixin";
-
-const cssInit = css`
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent;
-`;
-
-const cssImageAuto = css`
-  img {
-    max-width: 100%;
-    height: auto;
-  }
-`;
+import { flexSet, cssInit, cssImageAuto } from "../../utils/style";
+import { TCarouselItem } from "./types";
 
 const CarouselLayout = styled.div`
   ${cssInit};
-  ${flexSet({ alignItems: "center" })};
-
   position: relative;
+  overflow: hidden;
 `;
 
 const CarouselList = styled.ul`
@@ -30,9 +13,18 @@ const CarouselList = styled.ul`
   ${flexSet({ alignItems: "center" })};
   list-style: none;
 `;
-const CarouselItem = styled.li`
+
+const cssItemRatioMode = css<TCarouselItem>`
+  flex-basis: ${({ oneThumbRatio, itemLength }) => `calc(100% / ${oneThumbRatio ?? itemLength})`};
+`;
+const cssItemWidthMode = css<TCarouselItem>`
+  flex-basis: ${({ thumbWidth }) => `${thumbWidth}px`};
+`;
+const CarouselItem = styled.li<TCarouselItem>`
   ${cssInit}
   ${cssImageAuto};
+  flex-shrink: 0;
+  ${({ thumbMode }) => (thumbMode === "width" ? cssItemWidthMode : cssItemRatioMode)};
 `;
 
 export { CarouselLayout, CarouselList, CarouselItem };

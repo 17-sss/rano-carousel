@@ -1,25 +1,28 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { TCarousel } from "./types";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+
+import { TCarouselProps } from "./types";
 import * as style from "./style";
+import ArrowButton from "./ArrowButton";
 
-type TCarouselProps = TCarousel & {
-  children?: React.ReactNode | React.ReactNode[];
-  onClickItem?: (e: React.MouseEvent | MouseEvent) => void;
-};
-
-const Carousel: React.FC<TCarousel> = ({
+const Carousel = ({
   infiniteLoop = false,
-  thumbWidth,
+  thumbMode = "ratio",
+  thumbWidth = -1,
+  oneThumbRatio = 4,
   autoPlay = false,
   interval = 1000,
   stopOnHover = false,
   showArrows = true,
   swipeable = true,
+  iconRatio = 10,
+  buttonStyle,
   children,
 
   onClickItem,
   ...props
 }: TCarouselProps) => {
+  // const 
   const [data, setData] = useState<React.ReactNode[] | null>(null);
 
   useEffect(() => {
@@ -31,13 +34,30 @@ const Carousel: React.FC<TCarousel> = ({
 
   const cards = useMemo(() => {
     if (!data || data.length <= 0) return;
-    const cards = data.map((item, idx) => <CarouselItem key={idx}>{item}</CarouselItem>);
+    const cards = data.map((item, idx) => (
+      <CarouselItem
+        key={idx}
+        {...{ thumbMode, thumbWidth, oneThumbRatio }}
+        itemLength={data.length}
+      >
+        {item}
+      </CarouselItem>
+    ));
     return <CarouselList>{cards}</CarouselList>;
-  }, [data]);
+  }, [data, thumbMode, thumbWidth, oneThumbRatio]);
 
-  return data && data.length > 0 ? <CarouselLayout {...props}>{cards}</CarouselLayout> : <></>;
+  return data && data.length > 0 ? (
+    <CarouselLayout>
+      {cards}
+      <ArrowButton direction="left" {...{ iconRatio }}>{buttonStyle?.left || <IoIosArrowBack/>}</ArrowButton>
+      <ArrowButton direction="right" {...{ iconRatio }}>{buttonStyle?.right || <IoIosArrowForward/>}</ArrowButton>
+    </CarouselLayout>
+  ) : (
+    <></>
+  );
 };
 
 export default Carousel;
 
+// --- Styled Components
 const { CarouselLayout, CarouselList, CarouselItem } = style;
