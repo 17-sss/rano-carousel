@@ -1,3 +1,5 @@
+import { IconType } from "react-icons/lib";
+
 type TCarouselProps = {
   infiniteLoop?: boolean;
   thumbMode?: "width" | "ratio";
@@ -10,6 +12,10 @@ type TCarouselProps = {
   swipeable?: boolean;
   iconRatio?: number;
   children?: React.ReactNode | React.ReactNode[];
+  buttonStyle?: {
+    left: IconType | string;
+    right: IconType | string;
+  };
   onClickItem?: (e: React.MouseEvent | MouseEvent) => void;
 };
 

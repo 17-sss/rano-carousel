@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+
 import { TCarouselProps } from "./types";
 import * as style from "./style";
 import ArrowButton from "./ArrowButton";
@@ -14,11 +16,13 @@ const Carousel = ({
   showArrows = true,
   swipeable = true,
   iconRatio = 10,
+  buttonStyle,
   children,
 
   onClickItem,
   ...props
 }: TCarouselProps) => {
+  // const 
   const [data, setData] = useState<React.ReactNode[] | null>(null);
 
   useEffect(() => {
@@ -45,8 +49,8 @@ const Carousel = ({
   return data && data.length > 0 ? (
     <CarouselLayout>
       {cards}
-      <ArrowButton direction="left" {...{ iconRatio }} />
-      <ArrowButton direction="right" {...{ iconRatio }} />
+      <ArrowButton direction="left" {...{ iconRatio }}>{buttonStyle?.left || <IoIosArrowBack/>}</ArrowButton>
+      <ArrowButton direction="right" {...{ iconRatio }}>{buttonStyle?.right || <IoIosArrowForward/>}</ArrowButton>
     </CarouselLayout>
   ) : (
     <></>
