@@ -17,16 +17,28 @@ type TCarouselProps = {
   showArrows?: boolean;
   swipeable?: boolean;
   iconRatio?: number;
-  children?: React.ReactNode | React.ReactNode[];
+  animationDelay?: number;
   buttonStyle?: {
     left?: TCarouselButtonStyle;
     right?: TCarouselButtonStyle;
   };
-  onClickItem?: (e: React.MouseEvent | MouseEvent) => void;
+  children?: React.ReactNode | React.ReactNode[];
 };
+
+type TCarouselList = Pick<TCarouselProps, "animationDelay"> & {
+  listPos?: number;
+};
+
+type TCarouselListState = Required<Pick<TCarouselList, "listPos">> & {
+  itemIndexInfo: {
+    curr: number;
+    first: number;
+    last: number;
+  }
+}
 
 type TCarouselItem = Pick<TCarouselProps, "thumbMode" | "oneThumbRatio" | "thumbWidth"> & {
   itemLength: number;
 };
 
-export type { TCarouselProps, TCarouselButtonStyle, TCarouselItem };
+export type { TCarouselProps, TCarouselButtonStyle, TCarouselItem, TCarouselList, TCarouselListState };

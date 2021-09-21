@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import * as style from "./style";
+import * as S from "./style";
 import { TArrowButtonProps, TArrowButtonSizeInfo } from "./type";
 
 import { debounce } from "../../../utils/util";
@@ -47,18 +47,15 @@ const ArrowButton = ({ direction, iconRatio, style, children, onClick }: TArrowB
   // --
 
   return (
-    <ArrowButtonLayout
+    <S.ArrowButtonLayout
       onClick={onClick}
       ref={arrowButtonRef}
       style={style}
       {...{ sizeInfo, direction }}
     >
       {children || {}}
-    </ArrowButtonLayout>
+    </S.ArrowButtonLayout>
   );
 };
 
 export default ArrowButton;
-
-// --- Styled Components
-const { ArrowButtonLayout } = style;
