@@ -27,18 +27,31 @@ type TCarouselProps = {
 
 type TCarouselList = Pick<TCarouselProps, "animationDelay"> & {
   listPos?: number;
+  stopAnimation?: boolean;
 };
 
-type TCarouselListState = Required<Pick<TCarouselList, "listPos">> & {
+type TCarouselListState = Required<Pick<TCarouselList, "listPos" | "stopAnimation">> & {
   itemIndexInfo: {
     curr: number;
     first: number;
     last: number;
-  }
-}
+  };
+};
 
 type TCarouselItem = Pick<TCarouselProps, "thumbMode" | "oneThumbRatio" | "thumbWidth"> & {
   itemLength: number;
 };
 
-export type { TCarouselProps, TCarouselButtonStyle, TCarouselItem, TCarouselList, TCarouselListState };
+type TCarouselButtonSizeInfo = {
+  buttonHeight: number;
+  parentHeight: number;
+  iconRatio: number;
+};
+
+export type {
+  TCarouselProps,
+  TCarouselItem,
+  TCarouselList,
+  TCarouselListState,
+  TCarouselButtonSizeInfo,
+};

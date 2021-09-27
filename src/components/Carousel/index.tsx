@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
-import { TCarouselProps, TCarouselListState } from "./types";
+import { TCarouselProps, TCarouselListState, TCarouselButtonSizeInfo } from "./types";
 import * as S from "./style";
-import ArrowButton from "./ArrowButton";
+
+import { debounce } from "../../utils/util";
 
 const Carousel = ({
   infiniteLoop = false,
@@ -22,10 +23,19 @@ const Carousel = ({
   ...props
 }: TCarouselProps) => {
   const [data, setData] = useState<React.ReactNode[] | null>(null);
+  const [timer, setTimer] = useState(0);
   const [listState, setListState] = useState<TCarouselListState>({
     listPos: 0,
+    stopAnimation: false,
     itemIndexInfo: { curr: 0, first: 0, last: 0 },
   });
+  const [buttonSizeInfo, setButtonSizeInfo] = useState<TCarouselButtonSizeInfo>({
+    buttonHeight: 0,
+    parentHeight: 0,
+    iconRatio,
+  });
+
+  const carouselButtonRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
@@ -39,7 +49,7 @@ const Carousel = ({
     }));
   }, [children]);
 
-  // 캐러셀 조작
+  // 캐러셀 조작 (CarouselButton Click Event)
   const handleCarouselControl = useCallback(
     (direction: "left" | "right") => (e: React.MouseEvent | Event) => {
       if (!listRef.current || !data || !listState) return;
@@ -49,7 +59,7 @@ const Carousel = ({
       } = listState;
 
       if (prevCurrIdx === first && direction === "left") return;
-      if ((prevCurrIdx + oneThumbRatio) > last && direction === "right") return;
+      if (prevCurrIdx + oneThumbRatio > last && direction === "right") return;
 
       const currListWidth = listRef.current.offsetWidth;
       const pxPos = currListWidth / oneThumbRatio ?? data.length;
@@ -60,6 +70,7 @@ const Carousel = ({
       setListState((state) => ({
         ...state,
         listPos,
+        stopAnimation: false,
         itemIndexInfo: { ...state.itemIndexInfo, curr },
       }));
     },
@@ -69,10 +80,66 @@ const Carousel = ({
   const handleRightClick = handleCarouselControl("right");
   // ----
 
-  const cards = useMemo(() => {
+  // Resize 될 때 마다 Carousel의 listPos와 버튼의 크기 변경
+  const setListPosFix = useCallback(() => {
+    if (!listRef || !listRef.current || !data) return;
+    const { itemIndexInfo } = listState;
+    if (itemIndexInfo.curr === itemIndexInfo.first) return;
+
+    const currListWidth = listRef.current.offsetWidth;
+    const pxPos = currListWidth / oneThumbRatio ?? data.length;
+    const listPos = -(pxPos * itemIndexInfo.curr);
+
+    setListState((state) => ({
+      ...state,
+      stopAnimation: true,
+      listPos,
+    }));
+  }, [oneThumbRatio, data, listState]);
+
+  const setButtonsSizeFix = useCallback(() => {
+    if (
+      !carouselButtonRef ||
+      !carouselButtonRef.current ||
+      !carouselButtonRef.current.parentElement
+    ) return;
+
+    const buttonHeight = carouselButtonRef.current.offsetHeight;
+    const parentHeight = carouselButtonRef.current.parentElement.offsetHeight;
+    setButtonSizeInfo((state) => ({
+      ...state,
+      parentHeight,
+      buttonHeight,
+    }));
+  }, [carouselButtonRef]);
+
+  const handleResize = useCallback(() => {
+    setListPosFix();
+    setButtonsSizeFix();
+  }, [setListPosFix, setButtonsSizeFix]);
+
+  const handleResizeDebouncer = useCallback(() => {
+    const ms = 100;
+    debounce({ timer, setTimer, event: handleResize, ms });
+  }, [timer, handleResize]);
+
+  useEffect(() => {
+    window.addEventListener("resize", handleResizeDebouncer);
+    return () => window.removeEventListener("resize", handleResizeDebouncer);
+  });
+
+  // - 첫 렌더링 시에도 Carousel의 listPos와 버튼의 크기 계산해야함.
+  useEffect(() => {
+    window.setTimeout(() => handleResize(), 100);
+    // eslint-disable-next-line
+  }, [])
+
+  // ----
+
+  const carouselList = useMemo(() => {
     if (!data || data.length <= 0 || !listState) return;
-    const { listPos } = listState;
-    const cards = data.map((item, idx) => (
+    const { listPos, stopAnimation } = listState;
+    const items = data.map((item, idx) => (
       <S.CarouselItem
         key={idx}
         {...{ thumbMode, thumbWidth, oneThumbRatio }}
@@ -82,29 +149,33 @@ const Carousel = ({
       </S.CarouselItem>
     ));
     return (
-      <S.CarouselList ref={listRef} {...{ listPos, animationDelay }}>
-        {cards}
+      <S.CarouselList ref={listRef} {...{ listPos, animationDelay, stopAnimation }}>
+        {items}
       </S.CarouselList>
     );
   }, [data, thumbMode, thumbWidth, oneThumbRatio, listState, animationDelay]);
+  // ----
 
   return data && data.length > 0 ? (
     <S.CarouselLayout {...props}>
-      {cards}
-      <ArrowButton
+      {carouselList}
+      <S.CarouselButton
         direction="left"
+        sizeInfo={buttonSizeInfo}
         onClick={handleLeftClick}
-        {...{ iconRatio, style: buttonStyle?.left?.style }}
+        style={buttonStyle?.left?.style}
+        ref={carouselButtonRef} /* button ref는 하나만 지정해도 됨 */
       >
         {buttonStyle?.left?.icon || <IoIosArrowBack />}
-      </ArrowButton>
-      <ArrowButton
+      </S.CarouselButton>
+      <S.CarouselButton
         direction="right"
+        sizeInfo={buttonSizeInfo}
         onClick={handleRightClick}
-        {...{ iconRatio, style: buttonStyle?.right?.style }}
+        style={buttonStyle?.right?.style}
       >
         {buttonStyle?.right?.icon || <IoIosArrowForward />}
-      </ArrowButton>
+      </S.CarouselButton>
     </S.CarouselLayout>
   ) : (
     <></>
