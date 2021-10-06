@@ -2,7 +2,7 @@ import React from "react";
 import { IconType } from "react-icons/lib";
 
 type TCarouselButtonStyle = {
-  icon?: IconType | string;
+  icon?: JSX.Element | string;
   style?: React.CSSProperties;
 };
 
@@ -22,6 +22,7 @@ type TCarouselProps = {
     left?: TCarouselButtonStyle;
     right?: TCarouselButtonStyle;
   };
+  style?: React.CSSProperties,
   children?: React.ReactNode | React.ReactNode[];
 };
 
