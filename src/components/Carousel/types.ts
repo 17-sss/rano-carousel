@@ -1,4 +1,9 @@
-import { IconType } from "react-icons/lib";
+import React from "react";
+
+type TCarouselButtonStyle = {
+  icon?: JSX.Element | string;
+  style?: React.CSSProperties;
+};
 
 type TCarouselProps = {
   infiniteLoop?: boolean;
@@ -11,16 +16,41 @@ type TCarouselProps = {
   showArrows?: boolean;
   swipeable?: boolean;
   iconRatio?: number;
-  children?: React.ReactNode | React.ReactNode[];
+  animationDelay?: number;
   buttonStyle?: {
-    left: IconType | string;
-    right: IconType | string;
+    left?: TCarouselButtonStyle;
+    right?: TCarouselButtonStyle;
   };
-  onClickItem?: (e: React.MouseEvent | MouseEvent) => void;
+  style?: React.CSSProperties,
+  children?: React.ReactNode | React.ReactNode[];
+};
+
+type TCarouselList = Pick<TCarouselProps, "animationDelay"> & {
+  listPos?: number;
+  stopAnimation?: boolean;
+};
+
+type TCarouselListState = Required<Pick<TCarouselList, "listPos" | "stopAnimation">> & {
+  itemIndexInfo: {
+    curr: number;
+    first: number;
+    last: number;
+  };
 };
 
 type TCarouselItem = Pick<TCarouselProps, "thumbMode" | "oneThumbRatio" | "thumbWidth"> & {
   itemLength: number;
 };
 
-export type { TCarouselProps, TCarouselItem };
+type TCarouselSizeInfo = {
+  carouselHeight: number;
+  iconRatio: number;
+};
+
+export type {
+  TCarouselProps,
+  TCarouselItem,
+  TCarouselList,
+  TCarouselListState,
+  TCarouselSizeInfo,
+};
