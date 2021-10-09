@@ -1,5 +1,4 @@
 import React from "react";
-import { IconType } from "react-icons/lib";
 
 type TCarouselButtonStyle = {
   icon?: JSX.Element | string;
@@ -43,9 +42,8 @@ type TCarouselItem = Pick<TCarouselProps, "thumbMode" | "oneThumbRatio" | "thumb
   itemLength: number;
 };
 
-type TCarouselButtonSizeInfo = {
-  buttonHeight: number;
-  parentHeight: number;
+type TCarouselSizeInfo = {
+  carouselHeight: number;
   iconRatio: number;
 };
 
@@ -54,5 +52,5 @@ export type {
   TCarouselItem,
   TCarouselList,
   TCarouselListState,
-  TCarouselButtonSizeInfo,
+  TCarouselSizeInfo,
 };

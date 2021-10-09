@@ -20,7 +20,7 @@ const App = () => {
     },
     animationDelay: 0.2,
     iconRatio: 10,
-    oneThumbRatio: 2,
+    oneThumbRatio: 4,
   };
 
   return (

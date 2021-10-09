@@ -1,9 +1,10 @@
 import styled, { css } from "styled-components";
 import { flexSet, cssInit, cssImageAuto } from "../../utils/style";
-import { TCarouselItem, TCarouselList } from "./types";
+import { TCarouselItem, TCarouselList, TCarouselSizeInfo } from "./types";
 
 const CarouselLayout = styled.div`
   ${cssInit};
+  ${flexSet({ alignItems: "center" })};
   position: relative;
   overflow: hidden;
 `;
@@ -16,7 +17,7 @@ const CarouselList = styled.ul<TCarouselList>`
   ${flexSet({ alignItems: "center" })};
   list-style: none;
   position: relative;
-  left: ${({ listPos }) => (listPos ? `${listPos}px` : "0px")};
+  transform: ${({ listPos }) => (listPos ? `translateX(${listPos}%)` : `translateX(0%)`)};
   ${({ stopAnimation }) => !stopAnimation && cssListAnimation};
 `;
 
@@ -34,13 +35,12 @@ const CarouselItem = styled.li<TCarouselItem>`
   ${({ thumbMode }) => (thumbMode === "width" ? cssItemWidthMode : cssItemRatioMode)};
 `;
 
-type TCarouselButton = {
-  sizeInfo: { buttonHeight: number; parentHeight: number; iconRatio: number };
-  direction: "left" | "right";
-};
+type TCarouselButton = Pick<TCarouselSizeInfo, "carouselHeight"> &
+  Pick<Required<TCarouselSizeInfo>, "iconRatio"> & {
+    direction: "left" | "right";
+  };
 const CarouselButton = styled.button<TCarouselButton>`
   ${cssInit};
-  ${flexSet({ alignItems: "center", justifyContent: "center" })};
   ${({ direction }) =>
     direction === "left"
       ? css`
@@ -51,11 +51,10 @@ const CarouselButton = styled.button<TCarouselButton>`
         `};
 
   position: absolute;
-  width: inherit;
-  top: ${({ sizeInfo }) =>
-    sizeInfo ? `calc(50% - ${Math.floor(sizeInfo.buttonHeight / 2)}px)` : `calc(50%)`};
-  font-size: ${({ sizeInfo }) =>
-    sizeInfo ? `${Math.floor(sizeInfo.parentHeight * (sizeInfo.iconRatio * 0.01))}px` : `20px`};
+  width: fit-content;
+
+  font-size: ${({ carouselHeight, iconRatio }) =>
+    carouselHeight ? `${Math.floor(carouselHeight * (iconRatio * 0.01))}px` : `20px`};
 `;
 
 export { CarouselLayout, CarouselList, CarouselItem, CarouselButton };

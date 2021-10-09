@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
-import { TCarouselProps, TCarouselListState, TCarouselButtonSizeInfo } from "./types";
+import { TCarouselProps, TCarouselListState } from "./types";
 import * as S from "./style";
 
 import { debounce } from "../../utils/util";
@@ -29,15 +29,10 @@ const Carousel = ({
     stopAnimation: false,
     itemIndexInfo: { curr: 0, first: 0, last: 0 },
   });
-  const [buttonSizeInfo, setButtonSizeInfo] = useState<TCarouselButtonSizeInfo>({
-    buttonHeight: 0,
-    parentHeight: 0,
-    iconRatio,
-  });
+  const [carouselHeight, setCarouselHeight] = useState<number>(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
-  const carouselButtonRef = useRef<HTMLButtonElement>(null);
-  const listRef = useRef<HTMLUListElement>(null);
-
+  // 데이터 설정
   useEffect(() => {
     const isEmpty = !children || (Array.isArray(children) && children.length <= 0);
     if (isEmpty) return;
@@ -49,22 +44,19 @@ const Carousel = ({
     }));
   }, [children]);
 
-  // 캐러셀 조작 (CarouselButton Click Event)
+  // [1] 캐러셀 조작 (CarouselButton Click Event)
   const handleCarouselControl = useCallback(
     (direction: "left" | "right") => (e: React.MouseEvent | Event) => {
-      if (!listRef.current || !data || !listState) return;
-      const {
-        listPos: prevPos,
-        itemIndexInfo: { curr: prevCurrIdx, first, last },
-      } = listState;
+      if (!data || !listState) return;
+      const { listPos: prevPos, itemIndexInfo: { curr: prevCurrIdx, first, last } } = listState;
 
       if (prevCurrIdx === first && direction === "left") return;
       if (prevCurrIdx + oneThumbRatio > last && direction === "right") return;
 
-      const currListWidth = listRef.current.offsetWidth;
-      const pxPos = currListWidth / oneThumbRatio ?? data.length;
+      const MAX_PER = 100;
+      const perPos = Math.floor(MAX_PER / oneThumbRatio ?? data.length);
 
-      const listPos = direction === "left" ? prevPos + pxPos : prevPos - pxPos;
+      const listPos = direction === "left" ? prevPos + perPos : prevPos - perPos;
       const curr = direction === "left" ? prevCurrIdx - 1 : prevCurrIdx + 1;
 
       setListState((state) => ({
@@ -80,43 +72,16 @@ const Carousel = ({
   const handleRightClick = handleCarouselControl("right");
   // ----
 
-  // Resize 될 때 마다 Carousel의 listPos와 버튼의 크기 변경
-  const setListPosFix = useCallback(() => {
-    if (!listRef || !listRef.current || !data) return;
-    const { itemIndexInfo } = listState;
-    if (itemIndexInfo.curr === itemIndexInfo.first) return;
-
-    const currListWidth = listRef.current.offsetWidth;
-    const pxPos = currListWidth / oneThumbRatio ?? data.length;
-    const listPos = -(pxPos * itemIndexInfo.curr);
-
-    setListState((state) => ({
-      ...state,
-      stopAnimation: true,
-      listPos,
-    }));
-  }, [oneThumbRatio, data, listState]);
-
-  const setButtonsSizeFix = useCallback(() => {
-    if (
-      !carouselButtonRef ||
-      !carouselButtonRef.current ||
-      !carouselButtonRef.current.parentElement
-    ) return;
-
-    const buttonHeight = carouselButtonRef.current.offsetHeight;
-    const parentHeight = carouselButtonRef.current.parentElement.offsetHeight;
-    setButtonSizeInfo((state) => ({
-      ...state,
-      parentHeight,
-      buttonHeight,
-    }));
-  }, [carouselButtonRef]);
+  // [2] 캐러셀 버튼의 크기를 리사이즈시 동적으로 조절하기 위한 함수들
+  const setCarouselSizeFix = useCallback(() => {
+    if (!carouselRef || !carouselRef.current) return;
+    const carouselHeight = carouselRef.current.offsetHeight;
+    setCarouselHeight((state) => carouselHeight);
+  }, [carouselRef]);
 
   const handleResize = useCallback(() => {
-    setListPosFix();
-    setButtonsSizeFix();
-  }, [setListPosFix, setButtonsSizeFix]);
+    setCarouselSizeFix();
+  }, [setCarouselSizeFix]);
 
   const handleResizeDebouncer = useCallback(() => {
     const ms = 100;
@@ -132,8 +97,7 @@ const Carousel = ({
   useEffect(() => {
     window.setTimeout(() => handleResize(), 100);
     // eslint-disable-next-line
-  }, [])
-
+  }, []);
   // ----
 
   const carouselList = useMemo(() => {
@@ -148,29 +112,25 @@ const Carousel = ({
         {item}
       </S.CarouselItem>
     ));
-    return (
-      <S.CarouselList ref={listRef} {...{ listPos, animationDelay, stopAnimation }}>
-        {items}
-      </S.CarouselList>
-    );
+    return <S.CarouselList {...{ listPos, animationDelay, stopAnimation }}>{items}</S.CarouselList>;
   }, [data, thumbMode, thumbWidth, oneThumbRatio, listState, animationDelay]);
   // ----
 
   return data && data.length > 0 ? (
-    <S.CarouselLayout {...props}>
+    <S.CarouselLayout {...props} ref={carouselRef}>
       {carouselList}
+
       <S.CarouselButton
+        {...{iconRatio, carouselHeight}}
         direction="left"
-        sizeInfo={buttonSizeInfo}
         onClick={handleLeftClick}
         style={buttonStyle?.left?.style}
-        ref={carouselButtonRef} /* button ref는 하나만 지정해도 됨 */
       >
         {buttonStyle?.left?.icon || <IoIosArrowBack />}
       </S.CarouselButton>
       <S.CarouselButton
+        {...{iconRatio, carouselHeight}}
         direction="right"
-        sizeInfo={buttonSizeInfo}
         onClick={handleRightClick}
         style={buttonStyle?.right?.style}
       >
