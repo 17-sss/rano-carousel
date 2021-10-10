@@ -44,12 +44,15 @@ const Carousel = ({
     const isEmpty = !children || (Array.isArray(children) && children.length <= 0);
     if (isEmpty) return;
     if (!Array.isArray(children)) return setData([children]);
+
     setData(children.map((child) => child));
     setListState((state) => ({
       ...state,
+      listPos: infiniteLoop ? -perPos : 0,
       itemIndexInfo: { ...state.itemIndexInfo, last: children.length - 1 },
+      stopAnimation: infiniteLoop,
     }));
-  }, [children]);
+  }, [children, infiniteLoop, perPos]);
 
   // [1] 캐러셀 조작 (CarouselButton Click Event)
   const handleCarouselControl = useCallback(
@@ -58,9 +61,8 @@ const Carousel = ({
 
       const setCurrIdx = () => {
         const { itemIndexInfo: { curr: prevCurrIdx, first, last } } = listState;
-        debugger;
-        if (prevCurrIdx === first && direction === "left") return null;
-        if (prevCurrIdx + oneThumbRatio > last && direction === "right") return null;
+        if (prevCurrIdx === first && direction === "left") return infiniteLoop ? last : null;
+        if (prevCurrIdx + oneThumbRatio > last && direction === "right") return infiniteLoop ? first : null;
         return direction === "left" ? prevCurrIdx - 1 : prevCurrIdx + 1;
       }
       const curr = setCurrIdx();
@@ -69,8 +71,9 @@ const Carousel = ({
       const listPos = direction === "left" ? prevPos + perPos : prevPos - perPos;
       setListState((state) => ({...state, listPos, stopAnimation: false, itemIndexInfo: { ...state.itemIndexInfo, curr } }));
     },
-    [oneThumbRatio, data, listState, perPos]
+    [oneThumbRatio, infiniteLoop, data, listState, perPos]
   );
+
   const handleLeftClick = handleCarouselControl("left");
   const handleRightClick = handleCarouselControl("right");
   // ----
@@ -105,13 +108,28 @@ const Carousel = ({
 
   const carouselList = useMemo(() => {
     if (!data || data.length <= 0 || !listState) return;
-    const { listPos, stopAnimation } = listState;
-    const createItems = () =>
+    const { listPos, stopAnimation, itemIndexInfo } = listState;
+
+    const createTempItem = () => {
+      const TEMP_KEY = 0;
+      const prevIdx = itemIndexInfo.curr - 1;
+      return (
+        <S.CarouselItem
+          key={TEMP_KEY}
+          {...{ thumbMode, thumbWidth, oneThumbRatio }}
+          itemLength={data.length}
+        >
+          {prevIdx > -1 ? data[prevIdx] : data[data.length - 1]}
+        </S.CarouselItem>
+      );
+    };
+
+    const createItems = (isInfinite = false) =>
       data.map((item, idx) => {
         return (
           <S.CarouselItem
             {...{ thumbMode, thumbWidth, oneThumbRatio }}
-            key={idx}
+            key={isInfinite ? idx + 1 : idx}
             itemLength={data.length}
           >
             {item}
@@ -119,9 +137,11 @@ const Carousel = ({
         );
       });
 
-    const items = createItems();
+    const tempItem = infiniteLoop ? createTempItem() : null;
+    const tempItems = createItems(infiniteLoop);
+    const items = infiniteLoop ? [tempItem, ...tempItems] : [...tempItems];
     return <S.CarouselList {...{ listPos, animationDelay, stopAnimation }}>{items}</S.CarouselList>;
-  }, [data, thumbMode, thumbWidth, oneThumbRatio, listState, animationDelay]);
+  }, [data, thumbMode, thumbWidth, oneThumbRatio, listState, animationDelay, infiniteLoop]);
   // ----
 
   return data && data.length > 0 ? (
