@@ -32,7 +32,14 @@ const Carousel = ({
   const [carouselHeight, setCarouselHeight] = useState<number>(0);
   const carouselRef = useRef<HTMLDivElement>(null);
 
-  // 데이터 설정
+  // 한 칸 이동시 움직이는 범위
+  const perPos = useMemo(() => {
+    if (!data || data.length <= 0) return 0;
+    const MAX_PER = 100;
+    return Math.floor(MAX_PER / oneThumbRatio ?? data.length);
+  }, [oneThumbRatio, data]);
+
+  // 데이터 설정 (초기)
   useEffect(() => {
     const isEmpty = !children || (Array.isArray(children) && children.length <= 0);
     if (isEmpty) return;
@@ -47,26 +54,22 @@ const Carousel = ({
   // [1] 캐러셀 조작 (CarouselButton Click Event)
   const handleCarouselControl = useCallback(
     (direction: "left" | "right") => (e: React.MouseEvent | Event) => {
-      if (!data || !listState) return;
-      const { listPos: prevPos, itemIndexInfo: { curr: prevCurrIdx, first, last } } = listState;
+      if (!data || data.length <= 0 || !listState) return;
 
-      if (prevCurrIdx === first && direction === "left") return;
-      if (prevCurrIdx + oneThumbRatio > last && direction === "right") return;
-
-      const MAX_PER = 100;
-      const perPos = Math.floor(MAX_PER / oneThumbRatio ?? data.length);
-
+      const setCurrIdx = () => {
+        const { itemIndexInfo: { curr: prevCurrIdx, first, last } } = listState;
+        debugger;
+        if (prevCurrIdx === first && direction === "left") return null;
+        if (prevCurrIdx + oneThumbRatio > last && direction === "right") return null;
+        return direction === "left" ? prevCurrIdx - 1 : prevCurrIdx + 1;
+      }
+      const curr = setCurrIdx();
+      if (curr === null) return;
+      const prevPos = listState.listPos;
       const listPos = direction === "left" ? prevPos + perPos : prevPos - perPos;
-      const curr = direction === "left" ? prevCurrIdx - 1 : prevCurrIdx + 1;
-
-      setListState((state) => ({
-        ...state,
-        listPos,
-        stopAnimation: false,
-        itemIndexInfo: { ...state.itemIndexInfo, curr },
-      }));
+      setListState((state) => ({...state, listPos, stopAnimation: false, itemIndexInfo: { ...state.itemIndexInfo, curr } }));
     },
-    [oneThumbRatio, data, listState]
+    [oneThumbRatio, data, listState, perPos]
   );
   const handleLeftClick = handleCarouselControl("left");
   const handleRightClick = handleCarouselControl("right");
@@ -76,7 +79,7 @@ const Carousel = ({
   const setCarouselSizeFix = useCallback(() => {
     if (!carouselRef || !carouselRef.current) return;
     const carouselHeight = carouselRef.current.offsetHeight;
-    setCarouselHeight((state) => carouselHeight);
+    setCarouselHeight(() => carouselHeight);
   }, [carouselRef]);
 
   const handleResize = useCallback(() => {
@@ -103,15 +106,20 @@ const Carousel = ({
   const carouselList = useMemo(() => {
     if (!data || data.length <= 0 || !listState) return;
     const { listPos, stopAnimation } = listState;
-    const items = data.map((item, idx) => (
-      <S.CarouselItem
-        key={idx}
-        {...{ thumbMode, thumbWidth, oneThumbRatio }}
-        itemLength={data.length}
-      >
-        {item}
-      </S.CarouselItem>
-    ));
+    const createItems = () =>
+      data.map((item, idx) => {
+        return (
+          <S.CarouselItem
+            {...{ thumbMode, thumbWidth, oneThumbRatio }}
+            key={idx}
+            itemLength={data.length}
+          >
+            {item}
+          </S.CarouselItem>
+        );
+      });
+
+    const items = createItems();
     return <S.CarouselList {...{ listPos, animationDelay, stopAnimation }}>{items}</S.CarouselList>;
   }, [data, thumbMode, thumbWidth, oneThumbRatio, listState, animationDelay]);
   // ----
@@ -121,7 +129,7 @@ const Carousel = ({
       {carouselList}
 
       <S.CarouselButton
-        {...{iconRatio, carouselHeight}}
+        {...{ iconRatio, carouselHeight }}
         direction="left"
         onClick={handleLeftClick}
         style={buttonStyle?.left?.style}
@@ -129,7 +137,7 @@ const Carousel = ({
         {buttonStyle?.left?.icon || <IoIosArrowBack />}
       </S.CarouselButton>
       <S.CarouselButton
-        {...{iconRatio, carouselHeight}}
+        {...{ iconRatio, carouselHeight }}
         direction="right"
         onClick={handleRightClick}
         style={buttonStyle?.right?.style}

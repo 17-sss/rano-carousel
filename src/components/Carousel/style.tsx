@@ -21,18 +21,18 @@ const CarouselList = styled.ul<TCarouselList>`
   ${({ stopAnimation }) => !stopAnimation && cssListAnimation};
 `;
 
-const cssItemRatioMode = css<TCarouselItem>`
+const cssItemRatioMode = css<Pick<TCarouselItem, "oneThumbRatio" | "itemLength">>`
   flex-basis: ${({ oneThumbRatio, itemLength }) => `calc(100% / ${oneThumbRatio ?? itemLength})`};
 `;
-const cssItemWidthMode = css<TCarouselItem>`
+const cssItemWidthMode = css<Pick<TCarouselItem, "thumbWidth">>`
   flex-basis: ${({ thumbWidth }) => `${thumbWidth}px`};
 `;
 const CarouselItem = styled.li<TCarouselItem>`
   ${cssInit}
   ${cssImageAuto};
   ${flexSet({ alignItems: "center", justifyContent: "center" })};
-  flex-shrink: 0;
   ${({ thumbMode }) => (thumbMode === "width" ? cssItemWidthMode : cssItemRatioMode)};
+  flex-shrink: 0;
 `;
 
 type TCarouselButton = Pick<TCarouselSizeInfo, "carouselHeight"> &
