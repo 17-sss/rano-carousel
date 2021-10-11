@@ -1,5 +1,5 @@
-import Carousel from "./components/Carousel";
-import { TCarouselProps } from "./components/Carousel/types";
+import Carousel, { TCarouselProps } from "./components/Carousel";
+
 import { AiFillAppstore, AiFillFacebook } from "react-icons/ai";
 
 const App = () => {
@@ -18,9 +18,10 @@ const App = () => {
         icon: <AiFillFacebook />,
       },
     },
-    animationDelay: 0.2,
+    animationDelay: 0.1,
     iconRatio: 10,
-    oneThumbRatio: 4,
+    itemsDisplayedCount: 3,
+    infiniteLoop: true,
   };
 
   return (
