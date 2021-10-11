@@ -9,7 +9,7 @@ type TCarouselProps = {
   infiniteLoop?: boolean;
   thumbMode?: "width" | "ratio";
   thumbWidth?: number;
-  oneThumbRatio?: number;
+  itemsDisplayedCount?: number;
   autoPlay?: boolean;
   interval?: number;
   stopOnHover?: boolean;
@@ -21,7 +21,7 @@ type TCarouselProps = {
     left?: TCarouselButtonStyle;
     right?: TCarouselButtonStyle;
   };
-  style?: React.CSSProperties,
+  style?: React.CSSProperties;
   children?: React.ReactNode | React.ReactNode[];
 };
 
@@ -30,15 +30,16 @@ type TCarouselList = Pick<TCarouselProps, "animationDelay"> & {
   stopAnimation?: boolean;
 };
 
+type TItemIndexInfo = {
+  curr: number;
+  first: number;
+  last: number;
+};
 type TCarouselListState = Required<Pick<TCarouselList, "listPos" | "stopAnimation">> & {
-  itemIndexInfo: {
-    curr: number;
-    first: number;
-    last: number;
-  };
+  itemIndexInfo: TItemIndexInfo;
 };
 
-type TCarouselItem = Pick<TCarouselProps, "thumbMode" | "oneThumbRatio" | "thumbWidth"> & {
+type TCarouselItem = Pick<TCarouselProps, "thumbMode" | "itemsDisplayedCount" | "thumbWidth"> & {
   itemLength: number;
 };
 
@@ -47,10 +48,17 @@ type TCarouselSizeInfo = {
   iconRatio: number;
 };
 
+type TCarouselMoveState = {
+  direction?: "left" | "right";
+  isMove: boolean;
+};
+
 export type {
   TCarouselProps,
   TCarouselItem,
   TCarouselList,
   TCarouselListState,
+  TItemIndexInfo,
   TCarouselSizeInfo,
+  TCarouselMoveState,
 };
