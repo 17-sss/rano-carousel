@@ -1,5 +1,5 @@
 import styled, { css } from "styled-components";
-import { TCarouselItem, TCarouselList, TCarouselSizeInfo } from "./types";
+import { TCarouselItem, TCarouselList, TCarouselButton } from "./types";
 
 const cssInit = css`
   margin: 0;
@@ -27,18 +27,14 @@ type TFlexSet = {
     | "safe" | "unsafe" | "space-around" | "space-between" | "space-evenly";
 };
 
-const flexSet = ({
-  flexDirection = "row",
-  alignItems = "stretch",
-  justifyContent = "flex-start",
-}: TFlexSet) => css`
+const flexSet = ({ flexDirection = "row", alignItems = "stretch", justifyContent = "flex-start" }: TFlexSet) => css`
   display: flex;
   flex-direction: ${flexDirection};
   align-items: ${alignItems};
   justify-content: ${justifyContent};
 `;
 
-// ---
+// ---------------------------------------
 
 // [1] Layout
 const CarouselLayout = styled.div`
@@ -73,13 +69,18 @@ const CarouselItem = styled.li<TCarouselItem>`
 `;
 
 // [4] CAROUSEL BUTTON
-type TCarouselButton = Pick<TCarouselSizeInfo, "carouselHeight"> &
-  Pick<Required<TCarouselSizeInfo>, "iconRatio"> & {
-    direction: "left" | "right";
-  };
 const CarouselButton = styled.button<TCarouselButton>`
-  ${({ direction }) => direction === "left" ? css` left: 0; ` : css` right: 0;`};
-  cursor: pointer;
+  ${({ direction }) => direction === "left" ? css` left: 0; `: css` right: 0; `};
+  ${({ direction, buttonViewState: { displayedConut, itemIndexInfo, isInfiniteLoop } }) => {
+    const { curr, first, last } = itemIndexInfo;
+    let isEnd = false;
+    if (!isInfiniteLoop) {
+      if (curr <= first && direction === "left") isEnd = true;
+      if (curr + displayedConut > last && direction === "right") isEnd = true;
+    }
+    return isEnd ? css`cursor: not-allowed; opacity: 0.5`: css`cursor: pointer;`;
+  }};
+
   position: absolute;
   width: fit-content;
 
