@@ -16,27 +16,24 @@ const debounce = ({ timer, setTimer, event, ms = 200 }: TDebounce) => {
 const createCurrentDisplay = (
   children: JSX.Element[] | React.ReactNodeArray,
   start: number,
-  oneThumbRatio: number
+  itemsDisplayedCount: number
 ) => {
-  const result = children.slice(start, oneThumbRatio + start);
-  if (result.length < oneThumbRatio)
-    result.push(...children.slice(0, oneThumbRatio - result.length));
+  const result = children.slice(start, itemsDisplayedCount + start);
+  if (result.length < itemsDisplayedCount)
+    result.push(...children.slice(0, itemsDisplayedCount - result.length));
   return result;
 };
 
 const createTempItems = (
   children: JSX.Element[] | React.ReactNodeArray,
   itemIndexInfo: TItemIndexInfo,
-  oneThumbRatio: number
+  itemsDisplayedCount: number
 ) => {
   const { curr, first, last } = itemIndexInfo;
   const isFirst = first === curr;
   const firstTempItem = isFirst ? children[last] : children[curr - 1];
-  const lastIdx = ((curr + oneThumbRatio) - last) - 1;
-  const lastTempItem = children[curr + oneThumbRatio] ?? children[lastIdx];
-  // debugger;
-  // 4 [0 1 2 3] 4 => 0 [1 2 3 4] 0 => 1 [2 3 4 0] 1 => 2 [3 4 0 1] 2 => 3 [4 0 1 2] 3 => 4 [0 1 2 3] 4
-  // ((oneThumbRatio + curr) - last) - 1 // -> ((3 + 2) - 4) - 1 => 0
+  const lastIdx = ((curr + itemsDisplayedCount) - last) - 1;
+  const lastTempItem = children[curr + itemsDisplayedCount] ?? children[lastIdx];
 
   return [firstTempItem, lastTempItem];
 };
@@ -45,11 +42,11 @@ const createNextItems = (
   children: JSX.Element[] | React.ReactNodeArray | React.ReactNode | React.ReactNode[],
   itemIndexInfo: TItemIndexInfo,
   startIdx: number,
-  oneThumbRatio: number
+  itemsDisplayedCount: number
 ) => {
   const arrChildren = Array.isArray(children) ? children : [children];
-  const arrDisplayed = createCurrentDisplay(arrChildren, startIdx, oneThumbRatio);
-  const [firstTempItem, lastTempItem] = createTempItems(arrChildren, itemIndexInfo, oneThumbRatio);
+  const arrDisplayed = createCurrentDisplay(arrChildren, startIdx, itemsDisplayedCount);
+  const [firstTempItem, lastTempItem] = createTempItems(arrChildren, itemIndexInfo, itemsDisplayedCount);
   return [firstTempItem, ...arrDisplayed, lastTempItem];
 };
 

@@ -5,16 +5,19 @@ type TCarouselButtonStyle = {
   style?: React.CSSProperties;
 };
 
+type TCarouselAutoPlayOptions = {
+  direction: "left" | "right";
+  secInterval?: number;
+  stopOnHover?: boolean;
+};
+
 type TCarouselProps = {
   infiniteLoop?: boolean;
   thumbMode?: "width" | "ratio";
   thumbWidth?: number;
   itemsDisplayedCount?: number;
-  autoPlay?: boolean;
-  interval?: number;
-  stopOnHover?: boolean;
-  showArrows?: boolean;
-  swipeable?: boolean;
+  autoPlayOptions?: TCarouselAutoPlayOptions;
+  showButtons?: boolean;
   iconRatio?: number;
   animationDelay?: number;
   buttonStyle?: {
@@ -53,6 +56,12 @@ type TCarouselMoveState = {
   isMove: boolean;
 };
 
+type TCarouselInternalState = {
+  displayedConut: number;
+  isAutoPlayRun: boolean;
+  isLayoutMouseEnter: boolean;
+};
+
 export type {
   TCarouselProps,
   TCarouselItem,
@@ -61,4 +70,5 @@ export type {
   TItemIndexInfo,
   TCarouselSizeInfo,
   TCarouselMoveState,
+  TCarouselInternalState,
 };

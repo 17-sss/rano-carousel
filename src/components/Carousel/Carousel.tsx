@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
-import { TCarouselProps, TCarouselListState, TCarouselMoveState } from "./types";
+import { TCarouselProps, TCarouselListState, TCarouselMoveState, TCarouselInternalState } from "./types";
 import * as S from "./style";
 
 import { debounce, createNextItems } from "./funcs";
@@ -11,11 +11,8 @@ const Carousel = ({
   thumbMode = "ratio",
   thumbWidth = -1,
   itemsDisplayedCount = 4,
-  autoPlay = false,
-  interval = 1000,
-  stopOnHover = false,
-  showArrows = true,
-  swipeable = true,
+  autoPlayOptions,
+  showButtons = true,
   iconRatio = 10,
   animationDelay = 0.2,
   buttonStyle,
@@ -24,7 +21,11 @@ const Carousel = ({
 }: TCarouselProps) => {
   const [data, setData] = useState<React.ReactNode[] | null>(null);
   const [timer, setTimer] = useState<number>(0);
-  const [displayedConut, setDisplayedConut] = useState<number>(itemsDisplayedCount);
+  const [internalState, setInternalState] = useState<TCarouselInternalState>({
+    displayedConut: itemsDisplayedCount,
+    isAutoPlayRun: false,
+    isLayoutMouseEnter: false,
+  });
   const [moveState, setMoveState] = useState<TCarouselMoveState>({ isMove: false });
   const [listState, setListState] = useState<TCarouselListState>({
     listPos: 0,
@@ -39,8 +40,8 @@ const Carousel = ({
   const perPos = useMemo(() => {
     if (!data || data.length <= 0) return 0;
     const MAX_PER = 100;
-    return Math.floor(MAX_PER / displayedConut ?? data.length);
-  }, [displayedConut, data]);
+    return Math.floor(MAX_PER / internalState.displayedConut ?? data.length);
+  }, [internalState.displayedConut, data]);
 
   // 데이터 설정 (초기)
   useEffect(() => {
@@ -50,10 +51,11 @@ const Carousel = ({
     const childrenCount = (children as React.ReactNode[]).length;
     const lastIdx = childrenCount - 1;
     const initItemIndexInfo = { curr: 0, first: 0, last: lastIdx };
-    const nextItems = createNextItems(children, initItemIndexInfo, 0, displayedConut);
+    const nextItems = createNextItems(children, initItemIndexInfo, 0, internalState.displayedConut);
 
-    if (childrenCount < displayedConut) setDisplayedConut(() => childrenCount)
-    else if (displayedConut <= 0) setDisplayedConut(() => 1);
+    if (childrenCount < internalState.displayedConut)
+      setInternalState((state) => ({ ...state, displayedConut: childrenCount }));
+    else if (internalState.displayedConut <= 0) setInternalState((state) => ({ ...state, displayedConut: 1 }));
 
     setData(() => nextItems);
     setListState((state) => ({
@@ -62,26 +64,27 @@ const Carousel = ({
       itemIndexInfo: { ...state.itemIndexInfo, last: lastIdx },
       stopAnimation: true,
     }));
-  }, [children, infiniteLoop, perPos, displayedConut]);
+  }, [children, infiniteLoop, perPos, internalState.displayedConut]);
+  // --------------------------------------------
 
   // [1] 캐러셀 조작 (CarouselButton Click Event) + trans
   const handleCarouselControl = useCallback(
-    (direction: "left" | "right") => (e: React.MouseEvent | Event) => {
+    (direction: "left" | "right") => (e?: React.MouseEvent | Event) => {
       if (!data || data.length <= 0 || !listState || moveState.isMove) return;
 
       const setCurrIdx = () => {
-        const { itemIndexInfo: { curr: prevCurrIdx, first, last } } = listState;
+        const {
+          itemIndexInfo: { curr: prevCurrIdx, first, last },
+        } = listState;
         if (prevCurrIdx === first && direction === "left") return infiniteLoop ? last : null;
-        // if (prevCurrIdx + displayedConut > last && direction === "right") return infiniteLoop ? first + (prevCurrIdx - 1) : null;
         if (direction === "right") {
           if (infiniteLoop && prevCurrIdx === last) return first;
-          if (!infiniteLoop && prevCurrIdx + displayedConut > last) return null;
+          if (!infiniteLoop && prevCurrIdx + internalState.displayedConut > last) return null;
         }
         return direction === "left" ? prevCurrIdx - 1 : prevCurrIdx + 1;
       };
       const curr = setCurrIdx();
       if (curr === null) return;
-
       const prevPos = listState.listPos;
       const listPos = direction === "left" ? prevPos + perPos : prevPos - perPos;
       setListState((state) => ({
@@ -92,28 +95,28 @@ const Carousel = ({
       }));
       setMoveState(() => ({ isMove: true, direction }));
     },
-    [displayedConut, infiniteLoop, data, listState, perPos, moveState.isMove]
+    [infiniteLoop, data, listState, perPos, moveState.isMove, internalState.displayedConut]
   );
 
-  const handleLeftClick = handleCarouselControl("left");
-  const handleRightClick = handleCarouselControl("right");
+  const handleLeftButtonClick = handleCarouselControl("left");
+  const handleRightButtonClick = handleCarouselControl("right");
 
   // 다시 css transform 원상복구 & 아이템 목록 업데이트
-  const handelTransitionEnd = useCallback(() => {
+  const handleListTransitionEnd = useCallback(() => {
     const { isMove, direction } = moveState;
     const isNotDirection = typeof direction === "undefined";
     if (!isMove || isNotDirection) return;
 
-    const {listPos: prevPos, itemIndexInfo } = listState;
+    const { listPos: prevPos, itemIndexInfo } = listState;
     const listPos = direction === "left" ? prevPos - perPos : prevPos + perPos;
 
-    const nextItems = createNextItems(children, itemIndexInfo, itemIndexInfo.curr, displayedConut);
+    const nextItems = createNextItems(children, itemIndexInfo, itemIndexInfo.curr, internalState.displayedConut);
 
     setData(() => nextItems);
-    setListState((state) => ({...state, listPos, stopAnimation: true}));
+    setListState((state) => ({ ...state, listPos, stopAnimation: true }));
     setMoveState(() => ({ isMove: false, direction: undefined }));
-  }, [moveState, perPos, listState, children, displayedConut]);
-  // ----
+  }, [moveState, perPos, listState, children, internalState.displayedConut]);
+  // --------------------------------------------
 
   // [2] 캐러셀 버튼의 크기를 리사이즈시 동적으로 조절하기 위한 함수들
   const setCarouselSizeFix = useCallback(() => {
@@ -136,13 +139,32 @@ const Carousel = ({
     return () => window.removeEventListener("resize", handleResizeDebouncer);
   });
 
-  // - 첫 렌더링 시에도 Carousel의 listPos와 버튼의 크기 계산해야함.
+  // - 첫 렌더링 시, Carousel의 listPos와 버튼의 크기 계산 & autoPlay 설정
   useEffect(() => {
     const INIT_MS = 100;
-    window.setTimeout(() => handleResize(), INIT_MS);
+    const initResizeTimer = window.setTimeout(() => handleResize(), INIT_MS);
+    return () => clearTimeout(initResizeTimer);
     // eslint-disable-next-line
   }, []);
-  // ----
+  // --------------------------------------------
+
+  // [3] AutoPlay
+  useEffect(() => {
+    if (!autoPlayOptions || moveState.isMove) return;
+    const { secInterval, direction } = autoPlayOptions;
+    const UNIT = 1000;
+    const autoPlayTimer = window.setTimeout(
+      () => internalState.isLayoutMouseEnter || handleCarouselControl(direction)(),
+      secInterval ? secInterval * UNIT : UNIT
+    );
+    return () => clearTimeout(autoPlayTimer);
+  }, [autoPlayOptions, moveState.isMove, handleCarouselControl, internalState.isLayoutMouseEnter]);
+
+  const handleLayoutMouseEnter = (e?: React.MouseEvent | Event) =>
+    autoPlayOptions?.stopOnHover && setInternalState((state) => ({ ...state, isLayoutMouseEnter: true }));
+  const handleLayoutMouseLeave = (e?: React.MouseEvent | Event) =>
+    autoPlayOptions?.stopOnHover && setInternalState((state) => ({ ...state, isLayoutMouseEnter: false }));
+  // --------------------------------------------
 
   const carouselList = useMemo(() => {
     if (!data || data.length <= 0 || !listState) return;
@@ -153,7 +175,7 @@ const Carousel = ({
           <S.CarouselItem
             {...{ thumbMode, thumbWidth }}
             key={idx}
-            itemsDisplayedCount={displayedConut}
+            itemsDisplayedCount={internalState.displayedConut}
             itemLength={data.length}
           >
             {item}
@@ -161,36 +183,41 @@ const Carousel = ({
         );
       });
     return (
-      <S.CarouselList
-        onTransitionEnd={handelTransitionEnd}
-        {...{ listPos, animationDelay, stopAnimation }}
-      >
+      <S.CarouselList onTransitionEnd={handleListTransitionEnd} {...{ listPos, animationDelay, stopAnimation }}>
         {createItems()}
       </S.CarouselList>
     );
-  }, [data, thumbMode, thumbWidth, displayedConut, listState, animationDelay, handelTransitionEnd]);
-  // ----
+  }, [data, thumbMode, thumbWidth, internalState.displayedConut, listState, animationDelay, handleListTransitionEnd]);
+  // --------------------------------------------
 
   return data && data.length > 0 ? (
-    <S.CarouselLayout {...props} ref={carouselRef}>
+    <S.CarouselLayout
+      {...props}
+      ref={carouselRef}
+      onMouseEnter={handleLayoutMouseEnter}
+      onMouseLeave={handleLayoutMouseLeave}
+    >
       {carouselList}
-
-      <S.CarouselButton
-        {...{ iconRatio, carouselHeight }}
-        direction="left"
-        onClick={handleLeftClick}
-        style={buttonStyle?.left?.style}
-      >
-        {buttonStyle?.left?.icon || <IoIosArrowBack />}
-      </S.CarouselButton>
-      <S.CarouselButton
-        {...{ iconRatio, carouselHeight }}
-        direction="right"
-        onClick={handleRightClick}
-        style={buttonStyle?.right?.style}
-      >
-        {buttonStyle?.right?.icon || <IoIosArrowForward />}
-      </S.CarouselButton>
+      {showButtons && (
+        <>
+          <S.CarouselButton
+            {...{ iconRatio, carouselHeight }}
+            direction="left"
+            onClick={handleLeftButtonClick}
+            style={buttonStyle?.left?.style}
+          >
+            {buttonStyle?.left?.icon || <IoIosArrowBack />}
+          </S.CarouselButton>
+          <S.CarouselButton
+            {...{ iconRatio, carouselHeight }}
+            direction="right"
+            onClick={handleRightButtonClick}
+            style={buttonStyle?.right?.style}
+          >
+            {buttonStyle?.right?.icon || <IoIosArrowForward />}
+          </S.CarouselButton>
+        </>
+      )}
     </S.CarouselLayout>
   ) : (
     <></>
