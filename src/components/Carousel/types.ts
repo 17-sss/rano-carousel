@@ -13,8 +13,6 @@ type TCarouselAutoPlayOptions = {
 
 type TCarouselProps = {
   infiniteLoop?: boolean;
-  thumbMode?: "width" | "ratio";
-  thumbWidth?: number;
   itemsDisplayedCount?: number;
   autoPlayOptions?: TCarouselAutoPlayOptions;
   showButtons?: boolean;
@@ -42,7 +40,7 @@ type TCarouselListState = Required<Pick<TCarouselList, "listPos" | "stopAnimatio
   itemIndexInfo: TItemIndexInfo;
 };
 
-type TCarouselItem = Pick<TCarouselProps, "thumbMode" | "itemsDisplayedCount" | "thumbWidth"> & {
+type TCarouselItem = Pick<TCarouselProps, "itemsDisplayedCount"> & {
   itemLength: number;
 };
 

@@ -8,8 +8,6 @@ import { debounce, createNextItems } from "./funcs";
 
 const Carousel = ({
   infiniteLoop = false,
-  thumbMode = "ratio",
-  thumbWidth = -1,
   itemsDisplayedCount = 4,
   autoPlayOptions,
   showButtons = true,
@@ -173,7 +171,6 @@ const Carousel = ({
       data.map((item, idx) => {
         return (
           <S.CarouselItem
-            {...{ thumbMode, thumbWidth }}
             key={idx}
             itemsDisplayedCount={internalState.displayedConut}
             itemLength={data.length}
@@ -187,7 +184,7 @@ const Carousel = ({
         {createItems()}
       </S.CarouselList>
     );
-  }, [data, thumbMode, thumbWidth, internalState.displayedConut, listState, animationDelay, handleListTransitionEnd]);
+  }, [data, internalState.displayedConut, listState, animationDelay, handleListTransitionEnd]);
   // --------------------------------------------
 
   return data && data.length > 0 ? (

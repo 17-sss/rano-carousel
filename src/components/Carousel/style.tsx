@@ -65,16 +65,10 @@ const CarouselList = styled.ul<TCarouselList>`
 `;
 
 // [3] ITEM
-const cssItemRatioMode = css<Pick<TCarouselItem, "itemsDisplayedCount" | "itemLength">>`
-  flex-basis: ${({ itemsDisplayedCount, itemLength }) => `calc(100% / ${itemsDisplayedCount ?? itemLength})`};
-`;
-const cssItemWidthMode = css<Pick<TCarouselItem, "thumbWidth">>`
-  flex-basis: ${({ thumbWidth }) => `${thumbWidth}px`};
-`;
 const CarouselItem = styled.li<TCarouselItem>`
   ${cssImageAuto};
   ${flexSet({ alignItems: "center", justifyContent: "center" })};
-  ${({ thumbMode }) => (thumbMode === "width" ? cssItemWidthMode : cssItemRatioMode)};
+  flex-basis: ${({ itemsDisplayedCount, itemLength }) => `calc(100% / ${itemsDisplayedCount ?? itemLength})`};
   flex-shrink: 0;
 `;
 
