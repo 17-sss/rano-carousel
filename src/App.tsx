@@ -20,8 +20,9 @@ const App = () => {
     },
     animationDelay: 0.1,
     iconRatio: 10,
-    itemsDisplayedCount: 3,
+    itemsDisplayedCount: 4,
     infiniteLoop: true,
+    autoPlayOptions: { direction: "right", secInterval: 1, stopOnHover: true }
   };
 
   return (

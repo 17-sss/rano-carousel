@@ -84,15 +84,8 @@ type TCarouselButton = Pick<TCarouselSizeInfo, "carouselHeight"> &
     direction: "left" | "right";
   };
 const CarouselButton = styled.button<TCarouselButton>`
-  ${({ direction }) =>
-    direction === "left"
-      ? css`
-          left: 0;
-        `
-      : css`
-          right: 0;
-        `};
-
+  ${({ direction }) => direction === "left" ? css` left: 0; ` : css` right: 0;`};
+  cursor: pointer;
   position: absolute;
   width: fit-content;
 
