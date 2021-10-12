@@ -13,8 +13,6 @@ type TCarouselAutoPlayOptions = {
 
 type TCarouselProps = {
   infiniteLoop?: boolean;
-  thumbMode?: "width" | "ratio";
-  thumbWidth?: number;
   itemsDisplayedCount?: number;
   autoPlayOptions?: TCarouselAutoPlayOptions;
   showButtons?: boolean;
@@ -28,29 +26,43 @@ type TCarouselProps = {
   children?: React.ReactNode | React.ReactNode[];
 };
 
-type TCarouselList = Pick<TCarouselProps, "animationDelay"> & {
-  listPos?: number;
-  stopAnimation?: boolean;
-};
-
 type TItemIndexInfo = {
   curr: number;
   first: number;
   last: number;
 };
+
+// List
+type TCarouselList = Pick<TCarouselProps, "animationDelay"> & {
+  listPos?: number;
+  stopAnimation?: boolean;
+};
+
 type TCarouselListState = Required<Pick<TCarouselList, "listPos" | "stopAnimation">> & {
   itemIndexInfo: TItemIndexInfo;
 };
 
-type TCarouselItem = Pick<TCarouselProps, "thumbMode" | "itemsDisplayedCount" | "thumbWidth"> & {
+// Item
+type TCarouselItem = Pick<TCarouselProps, "itemsDisplayedCount"> & {
   itemLength: number;
 };
 
-type TCarouselSizeInfo = {
+// Button
+type TCarouselButtonViewState = {
+  displayedConut: number;
+  itemIndexInfo: TItemIndexInfo;
+  isInfiniteLoop: boolean;
+};
+type TCarouselButton = {
+  direction: "left" | "right";
   carouselHeight: number;
   iconRatio: number;
+  buttonViewState: TCarouselButtonViewState;
 };
+type TCarouselButtonProps = Omit<TCarouselButton, "direction">;
+// ----
 
+// -- State
 type TCarouselMoveState = {
   direction?: "left" | "right";
   isMove: boolean;
@@ -66,9 +78,10 @@ export type {
   TCarouselProps,
   TCarouselItem,
   TCarouselList,
+  TCarouselButton,
+  TCarouselButtonProps,
   TCarouselListState,
   TItemIndexInfo,
-  TCarouselSizeInfo,
   TCarouselMoveState,
   TCarouselInternalState,
 };

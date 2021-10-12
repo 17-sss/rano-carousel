@@ -1,15 +1,19 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
-import { TCarouselProps, TCarouselListState, TCarouselMoveState, TCarouselInternalState } from "./types";
+import {
+  TCarouselProps,
+  TCarouselListState,
+  TCarouselMoveState,
+  TCarouselInternalState,
+  TCarouselButtonProps,
+} from "./types";
 import * as S from "./style";
 
 import { debounce, createNextItems } from "./funcs";
 
 const Carousel = ({
   infiniteLoop = false,
-  thumbMode = "ratio",
-  thumbWidth = -1,
   itemsDisplayedCount = 4,
   autoPlayOptions,
   showButtons = true,
@@ -172,12 +176,7 @@ const Carousel = ({
     const createItems = () =>
       data.map((item, idx) => {
         return (
-          <S.CarouselItem
-            {...{ thumbMode, thumbWidth }}
-            key={idx}
-            itemsDisplayedCount={internalState.displayedConut}
-            itemLength={data.length}
-          >
+          <S.CarouselItem key={idx} itemsDisplayedCount={internalState.displayedConut} itemLength={data.length}>
             {item}
           </S.CarouselItem>
         );
@@ -187,8 +186,17 @@ const Carousel = ({
         {createItems()}
       </S.CarouselList>
     );
-  }, [data, thumbMode, thumbWidth, internalState.displayedConut, listState, animationDelay, handleListTransitionEnd]);
-  // --------------------------------------------
+  }, [data, internalState.displayedConut, listState, animationDelay, handleListTransitionEnd]);
+
+  const buttonProps: TCarouselButtonProps = {
+    iconRatio,
+    carouselHeight,
+    buttonViewState: {
+      itemIndexInfo: listState.itemIndexInfo,
+      displayedConut: internalState.displayedConut,
+      isInfiniteLoop: infiniteLoop,
+    },
+  };
 
   return data && data.length > 0 ? (
     <S.CarouselLayout
@@ -201,7 +209,8 @@ const Carousel = ({
       {showButtons && (
         <>
           <S.CarouselButton
-            {...{ iconRatio, carouselHeight }}
+            {...buttonProps}
+            aria-label="carousel left button"
             direction="left"
             onClick={handleLeftButtonClick}
             style={buttonStyle?.left?.style}
@@ -209,7 +218,8 @@ const Carousel = ({
             {buttonStyle?.left?.icon || <IoIosArrowBack />}
           </S.CarouselButton>
           <S.CarouselButton
-            {...{ iconRatio, carouselHeight }}
+            {...buttonProps}
+            aria-label="carousel right button"
             direction="right"
             onClick={handleRightButtonClick}
             style={buttonStyle?.right?.style}
