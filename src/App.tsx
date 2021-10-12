@@ -22,7 +22,7 @@ const App = () => {
     iconRatio: 10,
     itemsDisplayedCount: 4,
     infiniteLoop: true,
-    autoPlayOptions: { direction: "right", secInterval: 1, stopOnHover: true }
+    autoPlayOptions: { direction: "left", secInterval: 1, stopOnHover: true }
   };
 
   return (

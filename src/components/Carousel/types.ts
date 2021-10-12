@@ -17,7 +17,7 @@ type TCarouselProps = {
   thumbWidth?: number;
   itemsDisplayedCount?: number;
   autoPlayOptions?: TCarouselAutoPlayOptions;
-  showArrows?: boolean;
+  showButtons?: boolean;
   iconRatio?: number;
   animationDelay?: number;
   buttonStyle?: {

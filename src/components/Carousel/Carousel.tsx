@@ -12,7 +12,7 @@ const Carousel = ({
   thumbWidth = -1,
   itemsDisplayedCount = 4,
   autoPlayOptions,
-  showArrows = true,
+  showButtons = true,
   iconRatio = 10,
   animationDelay = 0.2,
   buttonStyle,
@@ -198,22 +198,26 @@ const Carousel = ({
       onMouseLeave={handleLayoutMouseLeave}
     >
       {carouselList}
-      <S.CarouselButton
-        {...{ iconRatio, carouselHeight }}
-        direction="left"
-        onClick={handleLeftButtonClick}
-        style={buttonStyle?.left?.style}
-      >
-        {buttonStyle?.left?.icon || <IoIosArrowBack />}
-      </S.CarouselButton>
-      <S.CarouselButton
-        {...{ iconRatio, carouselHeight }}
-        direction="right"
-        onClick={handleRightButtonClick}
-        style={buttonStyle?.right?.style}
-      >
-        {buttonStyle?.right?.icon || <IoIosArrowForward />}
-      </S.CarouselButton>
+      {showButtons && (
+        <>
+          <S.CarouselButton
+            {...{ iconRatio, carouselHeight }}
+            direction="left"
+            onClick={handleLeftButtonClick}
+            style={buttonStyle?.left?.style}
+          >
+            {buttonStyle?.left?.icon || <IoIosArrowBack />}
+          </S.CarouselButton>
+          <S.CarouselButton
+            {...{ iconRatio, carouselHeight }}
+            direction="right"
+            onClick={handleRightButtonClick}
+            style={buttonStyle?.right?.style}
+          >
+            {buttonStyle?.right?.icon || <IoIosArrowForward />}
+          </S.CarouselButton>
+        </>
+      )}
     </S.CarouselLayout>
   ) : (
     <></>
