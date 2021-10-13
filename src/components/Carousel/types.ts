@@ -41,6 +41,7 @@ type TCarouselList = Pick<TCarouselProps, "animationDelay"> & {
 
 type TCarouselListState = Required<Pick<TCarouselList, "listPos" | "stopAnimation">> & {
   itemIndexInfo: TItemIndexInfo;
+  prevAnimationPos: number;
 };
 
 // Item

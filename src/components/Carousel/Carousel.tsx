@@ -10,7 +10,7 @@ import {
 } from "./types";
 import * as S from "./style";
 
-import { debounce, createNextItems, createCarouselNextIndex } from "./funcs";
+import { debounce, createNextItems, createCarouselNextIndex, createAnimationPos } from "./funcs";
 
 const Carousel = ({
   infiniteLoop = false,
@@ -37,6 +37,7 @@ const Carousel = ({
     listPos: 0,
     stopAnimation: false,
     itemIndexInfo: { curr: 0, first: 0, last: 0 },
+    prevAnimationPos: 0,
   });
 
   const [carouselHeight, setCarouselHeight] = useState<number>(0);
@@ -92,20 +93,16 @@ const Carousel = ({
       const moveUnit = internalState.oneClickMoveItems;
  
       const { itemIndexInfo } = listState;
-      const curr = createCarouselNextIndex({
-        direction,
-        itemIndexInfo,
-        displayedCount: internalState.displayedCount,
-        moveUnit,
-        infiniteLoop,
-      });
+      const displayedCount =  internalState.displayedCount;
+      const curr = createCarouselNextIndex({ direction, itemIndexInfo, displayedCount, moveUnit, infiniteLoop });
 
       if (curr === null) return;
       const { listPos: prevPos } = listState;
-      const calcPos = perPos * moveUnit;
-      const listPos = direction === "left" ? prevPos + calcPos : prevPos - calcPos;
 
-      setListState((state) => ({ ...state, listPos, stopAnimation: false, itemIndexInfo: { ...state.itemIndexInfo, curr } }));
+      const animationPos = createAnimationPos({ perPos, moveUnit, itemIndexInfo, displayedCount, infiniteLoop, direction });
+      const listPos = direction === "left" ? prevPos + animationPos : prevPos - animationPos;
+
+      setListState((state) => ({ ...state, listPos, prevAnimationPos: animationPos, stopAnimation: false, itemIndexInfo: { ...state.itemIndexInfo, curr } }));
       setMoveState(() => ({ isMove: true, direction }));
     },
     [infiniteLoop, data, listState, perPos, moveState.isMove, internalState.displayedCount, internalState.oneClickMoveItems]
@@ -117,25 +114,26 @@ const Carousel = ({
   // 다시 css transform 원상복구 & 아이템 목록 업데이트
   const handleListTransitionEnd = useCallback(() => {
     const { isMove, direction } = moveState;
-    const isNotDirection = typeof direction === "undefined";
-    if (!isMove || isNotDirection) return;
+    if (!isMove || !direction) return;
 
-    const { listPos: prevPos, itemIndexInfo } = listState;
-    const calcPos = perPos * internalState.oneClickMoveItems;
-    const reversePos = direction === "left" ? prevPos - calcPos : prevPos + calcPos;
+    const displayedCount =  internalState.displayedCount;
+    const moveUnit = internalState.oneClickMoveItems;
+
+    const { listPos: prevPos, itemIndexInfo, prevAnimationPos } = listState;
+    const reversePos = direction === "left" ? prevPos - prevAnimationPos : prevPos + prevAnimationPos;
 
     const nextItems = createNextItems({
       children: children as React.ReactNodeArray,
       itemIndexInfo,
       startIdx: itemIndexInfo.curr,
-      displayedCount: internalState.displayedCount,
-      moveUnit: internalState.oneClickMoveItems,
+      displayedCount,
+      moveUnit,
     });
 
     setData(() => nextItems);
     setListState((state) => ({ ...state, listPos: reversePos, stopAnimation: true }));
     setMoveState(() => ({ isMove: false, direction: undefined }));
-  }, [moveState, perPos, listState, children, internalState.displayedCount, internalState.oneClickMoveItems]);
+  }, [moveState, listState, children, internalState.displayedCount, internalState.oneClickMoveItems]);
   // --------------------------------------------
 
   // [2] 캐러셀 버튼의 크기를 리사이즈시 동적으로 조절하기 위한 함수들

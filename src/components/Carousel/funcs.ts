@@ -32,13 +32,8 @@ type TCreateTempItems = {
   moveUnit: number;
 };
 
-const createTempItems = (params: TCreateTempItems) => {
-  const {
-    itemIndexInfo: { curr, first, last },
-    children,
-    displayedCount,
-    moveUnit,
-  } = params;
+const createTempItems = ({ itemIndexInfo, children, displayedCount, moveUnit }: TCreateTempItems) => {
+  const { curr, first, last } = itemIndexInfo;
 
   const createFrontTempItems = () => {
     const result = [];
@@ -83,8 +78,7 @@ const createTempItems = (params: TCreateTempItems) => {
 type TCreateNextItems = TCreateTempItems & {
   startIdx: number;
 };
-const createNextItems = (params: TCreateNextItems) => {
-  const { itemIndexInfo, children, displayedCount, startIdx, moveUnit } = params;
+const createNextItems = ({ itemIndexInfo, children, displayedCount, startIdx, moveUnit }: TCreateNextItems) => {
   const arrChildren = Array.isArray(children) ? children : [children];
   const arrDisplayed = createCurrentDisplay(arrChildren, startIdx, displayedCount);
   const { frontTempItems, backTempItems } = createTempItems({ itemIndexInfo, children, displayedCount, moveUnit });
@@ -98,14 +92,14 @@ type TCreateCarouselNextIndex = {
   itemIndexInfo: TItemIndexInfo;
   displayedCount: number;
 };
-const createCarouselNextIndex = (params: TCreateCarouselNextIndex) => {
-  const {
-    direction,
-    infiniteLoop,
-    itemIndexInfo: { curr: prevCurrIdx, first, last },
-    moveUnit,
-    displayedCount,
-  } = params;
+const createCarouselNextIndex = ({
+  direction,
+  infiniteLoop,
+  itemIndexInfo,
+  moveUnit,
+  displayedCount,
+}: TCreateCarouselNextIndex) => {
+  const { curr: prevCurrIdx, first, last } = itemIndexInfo;
 
   if (prevCurrIdx === first && direction === "left") return infiniteLoop ? last - (moveUnit - 1) : null;
   if (direction === "right") {
@@ -123,4 +117,29 @@ const createCarouselNextIndex = (params: TCreateCarouselNextIndex) => {
   return currTmpIdx;
 };
 
-export { debounce, createNextItems, createCarouselNextIndex };
+type TCreateAnimationPos = TCreateCarouselNextIndex & { perPos: number };
+const createAnimationPos = ({
+  perPos,
+  moveUnit,
+  itemIndexInfo,
+  displayedCount,
+  infiniteLoop,
+  direction,
+}: TCreateAnimationPos) => {
+  const { curr, first, last } = itemIndexInfo;
+
+  let animationUnit = moveUnit;
+  if (!infiniteLoop) {
+    if (direction === "left") {
+      const prevStart = curr - displayedCount;
+      if (prevStart < first) animationUnit = (displayedCount + prevStart);
+    } else {
+      const nextStart = curr + displayedCount;
+      const nextEnd = nextStart + moveUnit;
+      if (nextEnd > last) animationUnit = (last - nextStart) + 1;
+    }
+  }
+  return perPos * animationUnit;
+};
+
+export { debounce, createNextItems, createCarouselNextIndex, createAnimationPos };
