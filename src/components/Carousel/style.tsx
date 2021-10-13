@@ -71,12 +71,12 @@ const CarouselItem = styled.li<TCarouselItem>`
 // [4] CAROUSEL BUTTON
 const CarouselButton = styled.button<TCarouselButton>`
   ${({ direction }) => direction === "left" ? css` left: 0; `: css` right: 0; `};
-  ${({ direction, buttonViewState: { displayedConut, itemIndexInfo, isInfiniteLoop } }) => {
+  ${({ direction, buttonViewState: { displayedCount, itemIndexInfo, isInfiniteLoop } }) => {
     const { curr, first, last } = itemIndexInfo;
     let isEnd = false;
     if (!isInfiniteLoop) {
       if (curr <= first && direction === "left") isEnd = true;
-      if (curr + displayedConut > last && direction === "right") isEnd = true;
+      if (curr + displayedCount > last && direction === "right") isEnd = true;
     }
     return isEnd ? css`cursor: not-allowed; opacity: 0.5`: css`cursor: pointer;`;
   }};

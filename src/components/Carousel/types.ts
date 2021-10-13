@@ -14,6 +14,7 @@ type TCarouselAutoPlayOptions = {
 type TCarouselProps = {
   infiniteLoop?: boolean;
   itemsDisplayedCount?: number;
+  numberOneClickMoveItems?: number;
   autoPlayOptions?: TCarouselAutoPlayOptions;
   showButtons?: boolean;
   iconRatio?: number;
@@ -49,7 +50,7 @@ type TCarouselItem = Pick<TCarouselProps, "itemsDisplayedCount"> & {
 
 // Button
 type TCarouselButtonViewState = {
-  displayedConut: number;
+  displayedCount: number;
   itemIndexInfo: TItemIndexInfo;
   isInfiniteLoop: boolean;
 };
@@ -69,9 +70,10 @@ type TCarouselMoveState = {
 };
 
 type TCarouselInternalState = {
-  displayedConut: number;
+  displayedCount: number;
   isAutoPlayRun: boolean;
   isLayoutMouseEnter: boolean;
+  oneClickMoveItems: number;
 };
 
 export type {

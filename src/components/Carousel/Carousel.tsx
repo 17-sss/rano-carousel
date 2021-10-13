@@ -10,11 +10,12 @@ import {
 } from "./types";
 import * as S from "./style";
 
-import { debounce, createNextItems } from "./funcs";
+import { debounce, createNextItems, createCarouselNextIndex } from "./funcs";
 
 const Carousel = ({
   infiniteLoop = false,
   itemsDisplayedCount = 4,
+  numberOneClickMoveItems = 1,
   autoPlayOptions,
   showButtons = true,
   iconRatio = 10,
@@ -26,9 +27,10 @@ const Carousel = ({
   const [data, setData] = useState<React.ReactNode[] | null>(null);
   const [timer, setTimer] = useState<number>(0);
   const [internalState, setInternalState] = useState<TCarouselInternalState>({
-    displayedConut: itemsDisplayedCount,
+    displayedCount: itemsDisplayedCount,
     isAutoPlayRun: false,
     isLayoutMouseEnter: false,
+    oneClickMoveItems: numberOneClickMoveItems,
   });
   const [moveState, setMoveState] = useState<TCarouselMoveState>({ isMove: false });
   const [listState, setListState] = useState<TCarouselListState>({
@@ -40,14 +42,14 @@ const Carousel = ({
   const [carouselHeight, setCarouselHeight] = useState<number>(0);
   const carouselRef = useRef<HTMLDivElement>(null);
 
-  // 한 칸 이동시 움직이는 범위
+  // 보여지고 있는 아이템의 비율 (개당), 애니메이션이 실행되는 범위 (translateX, % 단위)로 사용
   const perPos = useMemo(() => {
     if (!data || data.length <= 0) return 0;
     const MAX_PER = 100;
-    return Math.floor(MAX_PER / internalState.displayedConut ?? data.length);
-  }, [internalState.displayedConut, data]);
+    return Math.floor(MAX_PER / internalState.displayedCount ?? data.length);
+  }, [data, internalState.displayedCount]);
 
-  // 데이터 설정 (초기)
+  // 초기 렌더링 시 데이터 설정 & 받아온 props 보정(internalState로 들어감)
   useEffect(() => {
     const isEmpty = !children || (Array.isArray(children) && children.length <= 0);
     if (isEmpty) return;
@@ -55,51 +57,58 @@ const Carousel = ({
     const childrenCount = (children as React.ReactNode[]).length;
     const lastIdx = childrenCount - 1;
     const initItemIndexInfo = { curr: 0, first: 0, last: lastIdx };
-    const nextItems = createNextItems(children, initItemIndexInfo, 0, internalState.displayedConut);
 
-    if (childrenCount < internalState.displayedConut)
-      setInternalState((state) => ({ ...state, displayedConut: childrenCount }));
-    else if (internalState.displayedConut <= 0) setInternalState((state) => ({ ...state, displayedConut: 1 }));
+    if (childrenCount < internalState.displayedCount)
+      setInternalState((state) => ({ ...state, displayedCount: childrenCount }));
+    else if (internalState.displayedCount <= 0) setInternalState((state) => ({ ...state, displayedCount: 1 }));
 
-    setData(() => nextItems);
+    if (internalState.displayedCount < internalState.oneClickMoveItems)
+      setInternalState((state) => ({ ...state, oneClickMoveItems: state.displayedCount }));
+
+    const isOverMoveUnit = internalState.displayedCount < internalState.oneClickMoveItems;
+    const moveUnit = isOverMoveUnit ? internalState.displayedCount : internalState.oneClickMoveItems;
+    setData(() => {
+      return createNextItems({
+        children: children as React.ReactNodeArray,
+        itemIndexInfo: initItemIndexInfo,
+        startIdx: 0,
+        displayedCount: internalState.displayedCount,
+        moveUnit,
+      });
+    });
     setListState((state) => ({
       ...state,
-      listPos: -perPos,
+      listPos: -perPos * moveUnit,
       itemIndexInfo: { ...state.itemIndexInfo, last: lastIdx },
       stopAnimation: true,
     }));
-  }, [children, infiniteLoop, perPos, internalState.displayedConut]);
+  }, [children, infiniteLoop, perPos, internalState.displayedCount, internalState.oneClickMoveItems]);
   // --------------------------------------------
 
   // [1] 캐러셀 조작 (CarouselButton Click Event) + trans
   const handleCarouselControl = useCallback(
     (direction: "left" | "right") => (e?: React.MouseEvent | Event) => {
       if (!data || data.length <= 0 || !listState || moveState.isMove) return;
+      const moveUnit = internalState.oneClickMoveItems;
+ 
+      const { itemIndexInfo } = listState;
+      const curr = createCarouselNextIndex({
+        direction,
+        itemIndexInfo,
+        displayedCount: internalState.displayedCount,
+        moveUnit,
+        infiniteLoop,
+      });
 
-      const setCurrIdx = () => {
-        const {
-          itemIndexInfo: { curr: prevCurrIdx, first, last },
-        } = listState;
-        if (prevCurrIdx === first && direction === "left") return infiniteLoop ? last : null;
-        if (direction === "right") {
-          if (infiniteLoop && prevCurrIdx === last) return first;
-          if (!infiniteLoop && prevCurrIdx + internalState.displayedConut > last) return null;
-        }
-        return direction === "left" ? prevCurrIdx - 1 : prevCurrIdx + 1;
-      };
-      const curr = setCurrIdx();
       if (curr === null) return;
-      const prevPos = listState.listPos;
-      const listPos = direction === "left" ? prevPos + perPos : prevPos - perPos;
-      setListState((state) => ({
-        ...state,
-        listPos,
-        stopAnimation: false,
-        itemIndexInfo: { ...state.itemIndexInfo, curr },
-      }));
+      const { listPos: prevPos } = listState;
+      const calcPos = perPos * moveUnit;
+      const listPos = direction === "left" ? prevPos + calcPos : prevPos - calcPos;
+
+      setListState((state) => ({ ...state, listPos, stopAnimation: false, itemIndexInfo: { ...state.itemIndexInfo, curr } }));
       setMoveState(() => ({ isMove: true, direction }));
     },
-    [infiniteLoop, data, listState, perPos, moveState.isMove, internalState.displayedConut]
+    [infiniteLoop, data, listState, perPos, moveState.isMove, internalState.displayedCount, internalState.oneClickMoveItems]
   );
 
   const handleLeftButtonClick = handleCarouselControl("left");
@@ -112,14 +121,21 @@ const Carousel = ({
     if (!isMove || isNotDirection) return;
 
     const { listPos: prevPos, itemIndexInfo } = listState;
-    const listPos = direction === "left" ? prevPos - perPos : prevPos + perPos;
+    const calcPos = perPos * internalState.oneClickMoveItems;
+    const reversePos = direction === "left" ? prevPos - calcPos : prevPos + calcPos;
 
-    const nextItems = createNextItems(children, itemIndexInfo, itemIndexInfo.curr, internalState.displayedConut);
+    const nextItems = createNextItems({
+      children: children as React.ReactNodeArray,
+      itemIndexInfo,
+      startIdx: itemIndexInfo.curr,
+      displayedCount: internalState.displayedCount,
+      moveUnit: internalState.oneClickMoveItems,
+    });
 
     setData(() => nextItems);
-    setListState((state) => ({ ...state, listPos, stopAnimation: true }));
+    setListState((state) => ({ ...state, listPos: reversePos, stopAnimation: true }));
     setMoveState(() => ({ isMove: false, direction: undefined }));
-  }, [moveState, perPos, listState, children, internalState.displayedConut]);
+  }, [moveState, perPos, listState, children, internalState.displayedCount, internalState.oneClickMoveItems]);
   // --------------------------------------------
 
   // [2] 캐러셀 버튼의 크기를 리사이즈시 동적으로 조절하기 위한 함수들
@@ -176,7 +192,7 @@ const Carousel = ({
     const createItems = () =>
       data.map((item, idx) => {
         return (
-          <S.CarouselItem key={idx} itemsDisplayedCount={internalState.displayedConut} itemLength={data.length}>
+          <S.CarouselItem key={idx} itemsDisplayedCount={internalState.displayedCount} itemLength={data.length}>
             {item}
           </S.CarouselItem>
         );
@@ -186,14 +202,14 @@ const Carousel = ({
         {createItems()}
       </S.CarouselList>
     );
-  }, [data, internalState.displayedConut, listState, animationDelay, handleListTransitionEnd]);
+  }, [data, internalState.displayedCount, listState, animationDelay, handleListTransitionEnd]);
 
   const buttonProps: TCarouselButtonProps = {
     iconRatio,
     carouselHeight,
     buttonViewState: {
       itemIndexInfo: listState.itemIndexInfo,
-      displayedConut: internalState.displayedConut,
+      displayedCount: internalState.displayedCount,
       isInfiniteLoop: infiniteLoop,
     },
   };

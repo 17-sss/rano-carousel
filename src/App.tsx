@@ -1,4 +1,5 @@
 import Carousel, { TCarouselProps } from "./components/Carousel";
+
 const App = () => {
   const carouselProps: TCarouselProps = {
     buttonStyle: {
@@ -13,16 +14,17 @@ const App = () => {
         },
       },
     },
-    animationDelay: 0.1,
+    animationDelay: 0.2,
     iconRatio: 10,
-    itemsDisplayedCount: 4,
+    itemsDisplayedCount: 5,
+    numberOneClickMoveItems: 3,
     // infiniteLoop: true,
-    children: [...Array(5)].map((_, idx) => <img key={idx} src={`/images/${idx + 1}.jpg`} alt={`${idx}`} />),
     // showButtons: false,
     // autoPlayOptions: { direction: "left", secInterval: 1, stopOnHover: true }
   };
 
-  return <Carousel {...carouselProps} />;
+  const items = [...Array(5)].map((_, idx) => <img key={idx} src={`/images/${idx + 1}.jpg`} alt={`${idx}`} />);
+  return <Carousel  {...carouselProps}>{items.concat(items)}</Carousel>;
 };
 
 export default App;
