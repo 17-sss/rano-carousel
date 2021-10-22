@@ -91,7 +91,7 @@ const Carousel = ({
     (direction: "left" | "right") => (e?: React.MouseEvent | Event) => {
       if (!data || data.length <= 0 || !listState || moveState.isMove) return;
       const moveUnit = internalState.oneClickMoveItems;
- 
+
       const { itemIndexInfo } = listState;
       const displayedCount =  internalState.displayedCount;
       const curr = createCarouselNextIndex({ direction, itemIndexInfo, displayedCount, moveUnit, infiniteLoop });

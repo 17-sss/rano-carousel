@@ -41,7 +41,6 @@ const CarouselLayout = styled.div`
   * {
     ${cssInit};
   }
-
   ${flexSet({ alignItems: "center" })};
   position: relative;
   overflow: hidden;
@@ -84,8 +83,13 @@ const CarouselButton = styled.button<TCarouselButton>`
   position: absolute;
   width: fit-content;
 
-  font-size: ${({ carouselHeight, iconRatio }) =>
-    carouselHeight ? `${Math.floor(carouselHeight * (iconRatio * 0.01))}px` : `20px`};
+  font-size: ${({ carouselHeight, iconRatio }) => {
+    let size = Math.floor(carouselHeight * (iconRatio * 0.01));
+    const MIN_SIZE = 20;
+    if (size < MIN_SIZE) size = MIN_SIZE;
+    return carouselHeight ? `${size}px` : `20px`;
+  }};
+
 `;
 
 export { CarouselLayout, CarouselList, CarouselItem, CarouselButton };
