@@ -41,7 +41,6 @@ const CarouselLayout = styled.div`
   * {
     ${cssInit};
   }
-
   ${flexSet({ alignItems: "center" })};
   position: relative;
   overflow: hidden;
@@ -50,7 +49,7 @@ const CarouselLayout = styled.div`
 
 // [2] List
 const cssListAnimation = css<TCarouselList>`
-  transition: ${({ animationDelay }) => `${animationDelay || 0.4}s all`};
+  transition: ${({ animationDelay }) => `${animationDelay ? (animationDelay * 0.001) : 0.4}s all`};
 `;
 const CarouselList = styled.ul<TCarouselList>`
   ${flexSet({ alignItems: "center" })};
@@ -58,14 +57,15 @@ const CarouselList = styled.ul<TCarouselList>`
   position: relative;
   transform: ${({ listPos }) => (listPos ? `translateX(${listPos}%)` : `translateX(0%)`)};
   ${({ stopAnimation }) => !stopAnimation && cssListAnimation};
+  width: ${({ carouselListWidth, itemLength, itemsDisplayedCount }) => {
+    if (!carouselListWidth || carouselListWidth === 0) return "auto";
+    return `calc((${carouselListWidth}px / ${itemLength}) * ${itemsDisplayedCount})`;
+  }};
 `;
 
 // [3] ITEM
 const CarouselItem = styled.li<TCarouselItem>`
   ${cssImageAuto};
-  ${flexSet({ alignItems: "center", justifyContent: "center" })};
-  flex-basis: ${({ itemsDisplayedCount, itemLength }) => `calc(100% / ${itemsDisplayedCount ?? itemLength})`};
-  flex-shrink: 0;
 `;
 
 // [4] CAROUSEL BUTTON
@@ -84,8 +84,13 @@ const CarouselButton = styled.button<TCarouselButton>`
   position: absolute;
   width: fit-content;
 
-  font-size: ${({ carouselHeight, iconRatio }) =>
-    carouselHeight ? `${Math.floor(carouselHeight * (iconRatio * 0.01))}px` : `20px`};
+  font-size: ${({ carouselHeight, iconRatio }) => {
+    let size = Math.floor(carouselHeight * (iconRatio * 0.01));
+    const MIN_SIZE = 20;
+    if (size < MIN_SIZE) size = MIN_SIZE;
+    return carouselHeight ? `${size}px` : `20px`;
+  }};
+
 `;
 
 export { CarouselLayout, CarouselList, CarouselItem, CarouselButton };

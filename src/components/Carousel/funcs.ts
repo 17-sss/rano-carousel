@@ -132,11 +132,14 @@ const createAnimationPos = ({
   if (!infiniteLoop) {
     if (direction === "left") {
       const prevStart = curr - displayedCount;
-      if (prevStart < first) animationUnit = (displayedCount + prevStart);
+      if (prevStart < first) {
+        const fixAnimationUnit = displayedCount + prevStart;
+        animationUnit = fixAnimationUnit > moveUnit ? animationUnit : fixAnimationUnit;
+      }
     } else {
       const nextStart = curr + displayedCount;
       const nextEnd = nextStart + moveUnit;
-      if (nextEnd > last) animationUnit = (last - nextStart) + 1;
+      if (nextEnd > last) animationUnit = last - nextStart + 1;
     }
   }
   return perPos * animationUnit;

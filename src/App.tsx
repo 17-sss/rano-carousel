@@ -1,30 +1,49 @@
+import { useMemo } from "react";
+import styled from "styled-components";
 import Carousel, { TCarouselProps } from "./components/Carousel";
 
 const App = () => {
   const carouselProps: TCarouselProps = {
-    buttonStyle: {
-      left: {
-        style: {
-          color: "red",
-        },
-      },
-      right: {
-        style: {
-          color: "blue",
-        },
-      },
-    },
-    animationDelay: 0.2,
-    iconRatio: 10,
-    itemsDisplayedCount: 5,
     numberOneClickMoveItems: 3,
-    // infiniteLoop: true,
-    // showButtons: false,
-    // autoPlayOptions: { direction: "left", secInterval: 1, stopOnHover: true }
+    itemsDisplayedCount: 5,
+    animationDelay: 200,
+    autoPlayOptions: {
+      direction: "right",
+      stopOnHover: true,
+      timeInterval: 1000,
+    },
+    infiniteLoop: true,
+    showButtons: false,
   };
 
-  const items = [...Array(5)].map((_, idx) => <img key={idx} src={`/images/${idx + 1}.jpg`} alt={`${idx}`} />);
-  return <Carousel  {...carouselProps}>{items.concat(items)}</Carousel>;
+  const cards = useMemo(() => {
+    const SIZE = 11;
+    return [...Array(SIZE)].map((_, i) => <Card key={i}>{i + 1}</Card>);
+  }, []);
+
+  return (
+    <AppLayout>
+      <Carousel {...carouselProps}>{cards}</Carousel>
+    </AppLayout>
+  );
 };
 
 export default App;
+
+const AppLayout = styled.div`
+  width: 1440px;
+  margin: 0 auto;
+  overflow: hidden;
+`;
+
+const Card = styled.div`
+  min-width: 200px;
+  min-height: 200px;
+  border: 1px solid #1974be;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 16px;
+`;
