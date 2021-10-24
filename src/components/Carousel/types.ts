@@ -7,7 +7,7 @@ type TCarouselButtonStyle = {
 
 type TCarouselAutoPlayOptions = {
   direction: "left" | "right";
-  secInterval?: number;
+  timeInterval?: number;
   stopOnHover?: boolean;
 };
 
@@ -33,10 +33,17 @@ type TItemIndexInfo = {
   last: number;
 };
 
+type TCarouselSizeInfo = {
+  listWidth?: number;
+  height?: number;
+};
+
 // List
-type TCarouselList = Pick<TCarouselProps, "animationDelay"> & {
+type TCarouselList = Pick<TCarouselProps, "animationDelay" | "itemsDisplayedCount"> & {
   listPos?: number;
   stopAnimation?: boolean;
+  carouselListWidth: number;
+  itemLength: number;
 };
 
 type TCarouselListState = Required<Pick<TCarouselList, "listPos" | "stopAnimation">> & {
@@ -85,6 +92,7 @@ export type {
   TCarouselButtonProps,
   TCarouselListState,
   TItemIndexInfo,
+  TCarouselSizeInfo,
   TCarouselMoveState,
   TCarouselInternalState,
 };

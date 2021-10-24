@@ -4,24 +4,41 @@ import Carousel, { TCarouselProps } from "./components/Carousel";
 
 const App = () => {
   const carouselProps: TCarouselProps = {
-    numberOneClickMoveItems: 1,
+    numberOneClickMoveItems: 3,
+    itemsDisplayedCount: 5,
+    animationDelay: 200,
+    autoPlayOptions: {
+      direction: "right",
+      stopOnHover: true,
+      timeInterval: 1000,
+    },
+    infiniteLoop: true,
+    showButtons: false,
   };
 
   const cards = useMemo(() => {
     const SIZE = 11;
-    return [...Array(SIZE)].map((_, i) => <Card>{i + 1}</Card>);
+    return [...Array(SIZE)].map((_, i) => <Card key={i}>{i + 1}</Card>);
   }, []);
 
-  return <Carousel {...carouselProps}>{cards}</Carousel>;
+  return (
+    <AppLayout>
+      <Carousel {...carouselProps}>{cards}</Carousel>
+    </AppLayout>
+  );
 };
 
 export default App;
 
-const Card = styled.div`
-  min-height: 200px;
-  min-width: 100px;
-  height: auto;
+const AppLayout = styled.div`
+  width: 1440px;
+  margin: 0 auto;
+  overflow: hidden;
+`;
 
+const Card = styled.div`
+  min-width: 200px;
+  min-height: 200px;
   border: 1px solid #1974be;
 
   display: flex;

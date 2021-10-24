@@ -49,7 +49,7 @@ const CarouselLayout = styled.div`
 
 // [2] List
 const cssListAnimation = css<TCarouselList>`
-  transition: ${({ animationDelay }) => `${animationDelay || 0.4}s all`};
+  transition: ${({ animationDelay }) => `${animationDelay ? (animationDelay * 0.001) : 0.4}s all`};
 `;
 const CarouselList = styled.ul<TCarouselList>`
   ${flexSet({ alignItems: "center" })};
@@ -57,14 +57,15 @@ const CarouselList = styled.ul<TCarouselList>`
   position: relative;
   transform: ${({ listPos }) => (listPos ? `translateX(${listPos}%)` : `translateX(0%)`)};
   ${({ stopAnimation }) => !stopAnimation && cssListAnimation};
+  width: ${({ carouselListWidth, itemLength, itemsDisplayedCount }) => {
+    if (!carouselListWidth || carouselListWidth === 0) return "auto";
+    return `calc((${carouselListWidth}px / ${itemLength}) * ${itemsDisplayedCount})`;
+  }};
 `;
 
 // [3] ITEM
 const CarouselItem = styled.li<TCarouselItem>`
   ${cssImageAuto};
-  ${flexSet({ alignItems: "center", justifyContent: "center" })};
-  flex-basis: ${({ itemsDisplayedCount, itemLength }) => `calc(100% / ${itemsDisplayedCount ?? itemLength})`};
-  flex-shrink: 0;
 `;
 
 // [4] CAROUSEL BUTTON

@@ -7,6 +7,7 @@ import {
   TCarouselMoveState,
   TCarouselInternalState,
   TCarouselButtonProps,
+  TCarouselSizeInfo,
 } from "./types";
 import * as S from "./style";
 
@@ -19,7 +20,7 @@ const Carousel = ({
   autoPlayOptions,
   showButtons = true,
   iconRatio = 10,
-  animationDelay = 0.2,
+  animationDelay = 400,
   buttonStyle,
   children,
   ...props
@@ -40,8 +41,9 @@ const Carousel = ({
     prevAnimationPos: 0,
   });
 
-  const [carouselHeight, setCarouselHeight] = useState<number>(0);
+  const [carouselSizeInfo, setCarouselSizeInfo] = useState<TCarouselSizeInfo | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const carouselListRef = useRef<HTMLUListElement>(null);
 
   // 보여지고 있는 아이템의 비율 (개당), 애니메이션이 실행되는 범위 (translateX, % 단위)로 사용
   const perPos = useMemo(() => {
@@ -139,9 +141,15 @@ const Carousel = ({
   // [2] 캐러셀 버튼의 크기를 리사이즈시 동적으로 조절하기 위한 함수들
   const setCarouselSizeFix = useCallback(() => {
     if (!carouselRef || !carouselRef.current) return;
-    const carouselHeight = carouselRef.current.offsetHeight;
-    setCarouselHeight(() => carouselHeight);
+    const height = carouselRef.current.offsetHeight;
+    setCarouselSizeInfo((state) => ({ ...state, height }));
   }, [carouselRef]);
+
+  const setCarouselListSizeFix = useCallback(() => {  // 처음에만 실행 (0.1초 뒤에 실행)
+    if (!carouselListRef || !carouselListRef.current) return;
+    const listWidth = carouselListRef.current.offsetWidth;
+    setCarouselSizeInfo((state) => ({ ...state, listWidth }));
+  }, [carouselListRef]);
 
   const handleResize = useCallback(() => {
     setCarouselSizeFix();
@@ -160,7 +168,10 @@ const Carousel = ({
   // - 첫 렌더링 시, Carousel의 listPos와 버튼의 크기 계산 & autoPlay 설정
   useEffect(() => {
     const INIT_MS = 100;
-    const initResizeTimer = window.setTimeout(() => handleResize(), INIT_MS);
+    const initResizeTimer = window.setTimeout(() => {
+      setCarouselSizeFix();
+      setCarouselListSizeFix();
+    }, INIT_MS);
     return () => clearTimeout(initResizeTimer);
     // eslint-disable-next-line
   }, []);
@@ -169,11 +180,13 @@ const Carousel = ({
   // [3] AutoPlay
   useEffect(() => {
     if (!autoPlayOptions || moveState.isMove) return;
-    const { secInterval, direction } = autoPlayOptions;
-    const UNIT = 1000;
+    const { timeInterval, direction } = autoPlayOptions;
+    let interval  = timeInterval || 1000;
+    if (interval.toString().length <= 2) interval = 100;
+
     const autoPlayTimer = window.setTimeout(
       () => internalState.isLayoutMouseEnter || handleCarouselControl(direction)(),
-      secInterval ? secInterval * UNIT : UNIT
+      interval
     );
     return () => clearTimeout(autoPlayTimer);
   }, [autoPlayOptions, moveState.isMove, handleCarouselControl, internalState.isLayoutMouseEnter]);
@@ -187,24 +200,36 @@ const Carousel = ({
   const carouselList = useMemo(() => {
     if (!data || data.length <= 0 || !listState) return;
     const { listPos, stopAnimation } = listState;
+
+    const itemsDisplayedCount= internalState.displayedCount;
+    const itemLength = data.length;
+
     const createItems = () =>
       data.map((item, idx) => {
         return (
-          <S.CarouselItem key={idx} itemsDisplayedCount={internalState.displayedCount} itemLength={data.length}>
+          <S.CarouselItem key={idx} {...{itemsDisplayedCount, itemLength}}>
             {item}
           </S.CarouselItem>
         );
       });
+
+    const carouselListWidth = carouselSizeInfo?.listWidth ?? 0;
+    const fixAnimationDelay = animationDelay.toString().length < 3 ? 1000 : animationDelay;
+
     return (
-      <S.CarouselList onTransitionEnd={handleListTransitionEnd} {...{ listPos, animationDelay, stopAnimation }}>
+      <S.CarouselList
+        ref={carouselListRef}
+        onTransitionEnd={handleListTransitionEnd}
+        {...{ listPos, animationDelay: fixAnimationDelay, stopAnimation, carouselListWidth, itemLength, itemsDisplayedCount }}
+      >
         {createItems()}
       </S.CarouselList>
     );
-  }, [data, internalState.displayedCount, listState, animationDelay, handleListTransitionEnd]);
+  }, [data, internalState.displayedCount, listState, animationDelay, handleListTransitionEnd, carouselSizeInfo]);
 
   const buttonProps: TCarouselButtonProps = {
     iconRatio,
-    carouselHeight,
+    carouselHeight: carouselSizeInfo?.height ?? 0,
     buttonViewState: {
       itemIndexInfo: listState.itemIndexInfo,
       displayedCount: internalState.displayedCount,
