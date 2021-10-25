@@ -1,13 +1,20 @@
 {
-  "name": "rano-carousel",
-  "version": "0.1.0",
-  "private": true,
+  "name": "rano-react-carousel",
+  "version": "1.0.0",
+  "description": "Carousel library for react.",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "keywords": [
+    "react",
+    "react carousel",
+    "carousel"
+  ],
+  "author": "Hoyoung Son",
+  "license": "MIT",
   "eslintConfig": {
     "extends": [
       "react-app",

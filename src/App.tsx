@@ -12,8 +12,15 @@ const App = () => {
       stopOnHover: true,
       timeInterval: 1000,
     },
+    buttonStyle: {
+      left: { icon: "<", style: { color: "red" } },
+      right: { icon: ">", style: { color: "blue" } },
+    },
     infiniteLoop: true,
-    showButtons: false,
+    showButtons: true,
+    iconRatio: 20,
+    // children,
+    // style,
   };
 
   const cards = useMemo(() => {
