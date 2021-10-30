@@ -23,6 +23,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # npm publish only
-.npmignore
+dist
 lib
-LICENSE
+

@@ -1,0 +1,26 @@
+{
+  "name": "rano-react-carousel",
+  "version": "1.0.2",
+  "description": "Carousel library for react.",
+  "main": "lib/index.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc",
+    "build:dist": "npm run clean && tsc && cp package.json LICENSE README.md ./dist"
+  },
+  "keywords": [
+    "react",
+    "react carousel",
+    "carousel"
+  ],
+  "author": "Hoyoung Son",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/react": "^17.0.33",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-icons": "^4.3.1",
+    "styled-components": "^5.3.3",
+    "typescript": "^4.4.4"
+  }
+}
