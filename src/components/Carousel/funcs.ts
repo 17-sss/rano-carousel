@@ -36,7 +36,7 @@ const createTempItems = ({ itemIndexInfo, children, displayedCount, moveUnit }: 
   const { curr, first, last } = itemIndexInfo;
 
   const createFrontTempItems = () => {
-    const result = [];
+    const result: React.ReactNode[] = [];
     const isFirst = first === curr;
 
     if (isFirst) result.push(...children.slice(last - moveUnit + 1, last + 1));
@@ -51,7 +51,7 @@ const createTempItems = ({ itemIndexInfo, children, displayedCount, moveUnit }: 
   };
 
   const createBackTempItems = () => {
-    const result = [];
+    const result: React.ReactNode[] = [];
 
     const tmpStart = curr + displayedCount;
     const isOverStart = tmpStart > last;
