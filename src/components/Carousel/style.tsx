@@ -43,8 +43,8 @@ const CarouselLayout = styled.div`
   }
   ${flexSet({ alignItems: "center" })};
   position: relative;
-  overflow: hidden;
   width: fit-content;
+  overflow: hidden;
 `;
 
 // [2] List
@@ -66,6 +66,9 @@ const CarouselList = styled.ul<TCarouselList>`
 // [3] ITEM
 const CarouselItem = styled.li<TCarouselItem>`
   ${cssImageAuto};
+  min-width: 100%;
+  height: auto;
+  overflow: hidden;
 `;
 
 // [4] CAROUSEL BUTTON

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 import {
   TCarouselProps,
@@ -15,7 +14,7 @@ import { debounce, createNextItems, createCarouselNextIndex, createAnimationPos 
 
 const Carousel = ({
   infiniteLoop = false,
-  itemsDisplayedCount = 4,
+  itemsDisplayedCount = 1,
   numberOneClickMoveItems = 1,
   autoPlayOptions,
   showButtons = true,
@@ -140,16 +139,16 @@ const Carousel = ({
 
   // [2] 캐러셀 버튼의 크기를 리사이즈시 동적으로 조절하기 위한 함수들
   const setCarouselSizeFix = useCallback(() => {
-    if (!carouselRef || !carouselRef.current) return;
+    if (!carouselRef.current) return;
     const height = carouselRef.current.offsetHeight;
     setCarouselSizeInfo((state) => ({ ...state, height }));
-  }, [carouselRef]);
+  }, []);
 
   const setCarouselListSizeFix = useCallback(() => {  // 처음에만 실행 (0.1초 뒤에 실행)
-    if (!carouselListRef || !carouselListRef.current) return;
+    if (!carouselListRef.current) return;
     const listWidth = carouselListRef.current.offsetWidth;
     setCarouselSizeInfo((state) => ({ ...state, listWidth }));
-  }, [carouselListRef]);
+  }, []);
 
   const handleResize = useCallback(() => {
     setCarouselSizeFix();
@@ -179,7 +178,7 @@ const Carousel = ({
 
   // [3] AutoPlay
   useEffect(() => {
-    if (!autoPlayOptions || moveState.isMove) return;
+    if (!autoPlayOptions || !infiniteLoop || moveState.isMove) return;
     const { timeInterval, direction } = autoPlayOptions;
     let interval  = timeInterval || 1000;
     if (interval.toString().length <= 2) interval = 100;
@@ -189,7 +188,7 @@ const Carousel = ({
       interval
     );
     return () => clearTimeout(autoPlayTimer);
-  }, [autoPlayOptions, moveState.isMove, handleCarouselControl, internalState.isLayoutMouseEnter]);
+  }, [infiniteLoop, autoPlayOptions, moveState.isMove, handleCarouselControl, internalState.isLayoutMouseEnter]);
 
   const handleLayoutMouseEnter = (e?: React.MouseEvent | Event) =>
     autoPlayOptions?.stopOnHover && setInternalState((state) => ({ ...state, isLayoutMouseEnter: true }));
@@ -254,7 +253,7 @@ const Carousel = ({
             onClick={handleLeftButtonClick}
             style={buttonStyle?.left?.style}
           >
-            {buttonStyle?.left?.icon || <IoIosArrowBack />}
+            {buttonStyle?.left?.icon || "<"}
           </S.CarouselButton>
           <S.CarouselButton
             {...buttonProps}
@@ -263,7 +262,7 @@ const Carousel = ({
             onClick={handleRightButtonClick}
             style={buttonStyle?.right?.style}
           >
-            {buttonStyle?.right?.icon || <IoIosArrowForward />}
+            {buttonStyle?.right?.icon || ">"}
           </S.CarouselButton>
         </>
       )}

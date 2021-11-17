@@ -4,8 +4,8 @@ import Carousel, { TCarouselProps } from "./components/Carousel";
 
 const App = () => {
   const carouselProps: TCarouselProps = {
-    numberOneClickMoveItems: 3,
-    itemsDisplayedCount: 5,
+    // numberOneClickMoveItems: 3,
+    // itemsDisplayedCount: 5,
     animationDelay: 200,
     autoPlayOptions: {
       direction: "right",
@@ -16,7 +16,7 @@ const App = () => {
       left: { icon: "<", style: { color: "red" } },
       right: { icon: ">", style: { color: "blue" } },
     },
-    infiniteLoop: true,
+    // infiniteLoop: true,
     showButtons: true,
     iconRatio: 20,
     // children,
