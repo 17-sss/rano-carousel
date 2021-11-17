@@ -1,12 +1,11 @@
 {
   "name": "rano-react-carousel",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Carousel library for react.",
   "main": "lib/index.js",
   "scripts": {
-    "clean": "rm -rf dist",
-    "build": "npm run clean && tsc",
-    "build:dist": "npm run clean && tsc && cp package.json LICENSE README.md ./dist"
+    "build": "rm -rf lib && tsc",
+    "build:dist": "rm -rf dist && tsc && cp package.json LICENSE README.md ./dist"
   },
   "keywords": [
     "react",
