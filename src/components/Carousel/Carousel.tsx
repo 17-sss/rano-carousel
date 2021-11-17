@@ -20,6 +20,7 @@ const Carousel = ({
   showButtons = true,
   iconRatio = 10,
   animationDelay = 400,
+  additionalOptions,
   buttonStyle,
   children,
   ...props
@@ -71,7 +72,7 @@ const Carousel = ({
     const moveUnit = isOverMoveUnit ? internalState.displayedCount : internalState.oneClickMoveItems;
     setData(() => {
       return createNextItems({
-        children: children as React.ReactNodeArray,
+        children: children as React.ReactNode[],
         itemIndexInfo: initItemIndexInfo,
         startIdx: 0,
         displayedCount: internalState.displayedCount,
@@ -124,7 +125,7 @@ const Carousel = ({
     const reversePos = direction === "left" ? prevPos - prevAnimationPos : prevPos + prevAnimationPos;
 
     const nextItems = createNextItems({
-      children: children as React.ReactNodeArray,
+      children: children as React.ReactNode[],
       itemIndexInfo,
       startIdx: itemIndexInfo.curr,
       displayedCount,
@@ -206,7 +207,11 @@ const Carousel = ({
     const createItems = () =>
       data.map((item, idx) => {
         return (
-          <S.CarouselItem key={idx} {...{itemsDisplayedCount, itemLength}}>
+          <S.CarouselItem
+            key={idx}
+            {...{ itemsDisplayedCount, itemLength }}
+            isAllFluidSize={additionalOptions?.isAllFluidSize}
+          >
             {item}
           </S.CarouselItem>
         );
@@ -224,7 +229,7 @@ const Carousel = ({
         {createItems()}
       </S.CarouselList>
     );
-  }, [data, internalState.displayedCount, listState, animationDelay, handleListTransitionEnd, carouselSizeInfo]);
+  }, [data, internalState.displayedCount, listState, animationDelay, handleListTransitionEnd, carouselSizeInfo, additionalOptions]);
 
   const buttonProps: TCarouselButtonProps = {
     iconRatio,

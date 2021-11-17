@@ -11,6 +11,10 @@ type TCarouselAutoPlayOptions = {
   stopOnHover?: boolean;
 };
 
+type TAdditionalOptions = {
+  isAllFluidSize?: boolean;
+};
+
 type TCarouselProps = {
   infiniteLoop?: boolean;
   itemsDisplayedCount?: number;
@@ -23,6 +27,7 @@ type TCarouselProps = {
     left?: TCarouselButtonStyle;
     right?: TCarouselButtonStyle;
   };
+  additionalOptions?: TAdditionalOptions,
   style?: React.CSSProperties;
   children?: React.ReactNode | React.ReactNode[];
 };
@@ -52,9 +57,10 @@ type TCarouselListState = Required<Pick<TCarouselList, "listPos" | "stopAnimatio
 };
 
 // Item
-type TCarouselItem = Pick<TCarouselProps, "itemsDisplayedCount"> & {
-  itemLength: number;
-};
+type TCarouselItem = Pick<TCarouselProps, "itemsDisplayedCount"> &
+  Pick<TAdditionalOptions, "isAllFluidSize"> & {
+    itemLength: number;
+  };
 
 // Button
 type TCarouselButtonViewState = {

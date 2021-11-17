@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import styled from "styled-components";
 import Carousel, { TCarouselProps } from "./components/Carousel";
 
@@ -19,18 +18,30 @@ const App = () => {
     // infiniteLoop: true,
     showButtons: true,
     iconRatio: 20,
+    additionalOptions: {
+      isAllFluidSize: true
+    }
     // children,
     // style,
   };
 
-  const cards = useMemo(() => {
-    const SIZE = 11;
-    return [...Array(SIZE)].map((_, i) => <Card key={i}>{i + 1}</Card>);
-  }, []);
-
   return (
     <AppLayout>
-      <Carousel {...carouselProps}>{cards}</Carousel>
+      <Carousel {...carouselProps}>
+        <video autoPlay loop muted playsInline>
+          <source src="./video/01.mp4" type={`video/mp4`} />
+        </video>
+
+        <video autoPlay loop muted playsInline>
+          <source src="./video/02.webm" type={`video/webm`} />
+        </video>
+
+        <img src="./images/1.jpg" alt="img" />
+
+        <div>4</div>
+        <span>5</span>
+        <Card>6</Card>
+      </Carousel>
     </AppLayout>
   );
 };
