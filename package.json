@@ -1,6 +1,6 @@
 {
   "name": "rano-react-carousel",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Carousel library for react.",
   "main": "lib/index.js",
   "scripts": {
