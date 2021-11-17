@@ -16,7 +16,7 @@ const debounce = ({ timer, setTimer, event, ms = 200 }: TDebounce) => {
 // ---------------
 
 const createCurrentDisplay = (
-  children: JSX.Element[] | React.ReactNodeArray,
+  children: JSX.Element[] | React.ReactNode[],
   start: number,
   displayedCount: number
 ) => {
@@ -26,7 +26,7 @@ const createCurrentDisplay = (
 };
 
 type TCreateTempItems = {
-  children: JSX.Element[] | React.ReactNodeArray | React.ReactNode[];
+  children: JSX.Element[]  | React.ReactNode[];
   itemIndexInfo: TItemIndexInfo;
   displayedCount: number;
   moveUnit: number;

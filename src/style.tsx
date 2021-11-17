@@ -11,13 +11,22 @@ const cssInit = css`
   background: transparent;
 `;
 
-const cssImageAuto = css`
-  img {
-    max-width: 100%;
-    height: auto;
-  }
+const cssFluidSize = css`
+  max-width: 100%;
+  height: auto;
 `;
-
+const setAllFluidSize = (isAllFluidSize?: boolean) =>
+  isAllFluidSize
+    ? css`
+        * {
+          ${cssFluidSize}
+        }
+      `
+    : css`
+        img {
+          ${cssFluidSize}
+        }
+      `;
 type TFlexSetCommon = "inherit" | "initial" | "unset";
 type TFlexSetSortCommon = TFlexSetCommon | "baseline" | "flex-start" | "flex-end" | "center" | "stretch";
 type TFlexSet = {
@@ -65,10 +74,10 @@ const CarouselList = styled.ul<TCarouselList>`
 
 // [3] ITEM
 const CarouselItem = styled.li<TCarouselItem>`
-  ${cssImageAuto};
+  ${({isAllFluidSize}) => setAllFluidSize(isAllFluidSize)};
+  overflow: hidden;
   min-width: 100%;
   height: auto;
-  overflow: hidden;
 `;
 
 // [4] CAROUSEL BUTTON
@@ -93,6 +102,7 @@ const CarouselButton = styled.button<TCarouselButton>`
     if (size < MIN_SIZE) size = MIN_SIZE;
     return carouselHeight ? `${size}px` : `20px`;
   }};
+
 
 `;
 
